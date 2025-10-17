@@ -58,7 +58,18 @@ button:hover { background:#0d47a1; }
   <textarea id="keterangan" rows="3"></textarea>
 
   <label>📸 Upload Foto Lokasi:</label>
-  <input type="file" id="foto" name="foto" accept="image/*">
+<input type="file" id="foto" name="foto" accept="image/*" capture="environment"
+ style="display:block;cursor:pointer;background:#fafafa;border:1px solid #ccc;padding:5px;border-radius:6px;"
+ onchange="fileDipilih(this)">
+<small>📷 Pilih dari galeri atau ambil foto langsung</small>
+
+<script>
+function fileDipilih(el){
+  if(el.files.length>0){
+    document.getElementById('msg').innerHTML = "📸 Foto dipilih: " + el.files[0].name;
+  }
+}
+</script>
 
   <div id="progressBar"><div id="progress"></div></div>
 
@@ -186,3 +197,4 @@ window.onload = () => {
 </script>
 </body>
 </html>
+
