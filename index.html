@@ -138,36 +138,43 @@ window.onload = () => {
   });
 
   // === KIRIM DATA ===
-  document.getElementById('tinjuForm').addEventListener('submit', e => {
-    e.preventDefault();
-    const fotoFile = document.getElementById('foto').files[0];
-    const formData = new FormData();
-    formData.append('data', JSON.stringify({
-      tanggal: document.getElementById('tanggal').value,
-      petugas: document.getElementById('petugas').value,
-      lokasi: document.getElementById('lokasi').value,
-      koordinat: document.getElementById('koordinat').value,
-      jenis: document.getElementById('jenis').value,
-      keterangan: document.getElementById('keterangan').value
-    }));
-    if (fotoFile) formData.append('foto', fotoFile);
+document.getElementById('tinjuForm').addEventListener('submit', e => {
+  e.preventDefault();
 
-    fetch(scriptURL, { method: 'POST', body: formData })
-      .then(r => r.json())
-      .then(res => {
-        if (res.status === "success") {
-          document.getElementById('msg').innerHTML = "✅ Data berhasil dikirim!";
-          e.target.reset();
-        } else {
-          document.getElementById('msg').innerHTML = "⚠️ " + res.message;
-        }
-      })
-      .catch(err => {
-        document.getElementById('msg').innerHTML = "❌ Gagal mengirim data!";
-        console.error(err);
-      });
+  const data = {
+    tanggal: document.getElementById('tanggal').value,
+    petugas: document.getElementById('petugas').value,
+    lokasi: document.getElementById('lokasi').value,
+    koordinat: document.getElementById('koordinat').value,
+    jenis: document.getElementById('jenis').value,
+    keterangan: document.getElementById('keterangan').value
+  };
+
+  fetch(scriptURL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  })
+  .then(async r => {
+    let res;
+    try { res = await r.json(); }
+    catch { throw new Error("Respon bukan JSON"); }
+
+    if (res.status === "success") {
+      document.getElementById('msg').innerHTML = "✅ Data berhasil dikirim!";
+      e.target.reset();
+    } else {
+      document.getElementById('msg').innerHTML = "⚠️ " + res.message;
+    }
+  })
+  .catch(err => {
+    console.error("Kesalahan:", err);
+    document.getElementById('msg').innerHTML = "❌ Gagal mengirim data!";
   });
+});
+
 };
 </script>
 </body>
 </html>
+
