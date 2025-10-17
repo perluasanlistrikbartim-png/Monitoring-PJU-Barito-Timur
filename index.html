@@ -5,33 +5,56 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>TINJU – Monitoring PJU Barito Timur</title>
 
-<!-- Leaflet CSS -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 <style>
-body { font-family: Arial, sans-serif; margin:0; background:#f4f7fb;}
-h2 { text-align:center; background:#1976d2; color:white; padding:10px; margin:0;}
-form {
-  background:white; padding:20px; border-radius:10px;
-  box-shadow:0 2px 8px rgba(0,0,0,0.15);
-  max-width:460px; margin:20px auto;
+body {
+  font-family: Arial, sans-serif;
+  background: #f4f7fb;
+  margin: 0;
+  padding: 0;
 }
-label { display:block; margin-top:10px; font-weight:bold;}
-input,select,textarea {
-  width:100%; padding:8px; border:1px solid #ccc;
-  border-radius:6px; font-size:14px;
+h2 {
+  text-align: center;
+  background: #1976d2;
+  color: white;
+  padding: 10px;
+  margin: 0;
+}
+form {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  max-width: 460px;
+  margin: 20px auto;
+}
+label { display:block; margin-top:10px; font-weight:bold; }
+input, select, textarea {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
 }
 button {
-  margin-top:10px; width:100%; padding:10px; border:none;
-  border-radius:6px; font-weight:bold; color:white;
-  background:#1976d2; cursor:pointer;
+  margin-top: 10px;
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  color: white;
+  background: #1976d2;
+  cursor: pointer;
 }
-button:hover { background:#0d47a1;}
-#map,#output-map { height:320px; border-radius:10px; margin-top:10px;}
-#msg { text-align:center; margin-top:10px; font-weight:bold;}
-#detail {
-  background:white; max-width:600px; margin:10px auto; padding:10px;
-  border-radius:10px; box-shadow:0 2px 6px rgba(0,0,0,0.15);
+button:hover { background: #0d47a1; }
+#map {
+  height: 320px;
+  border-radius: 10px;
+  margin-top: 10px;
+  border: 1px solid #aaa;
 }
+#msg { text-align: center; margin-top: 10px; font-weight: bold; }
 </style>
 </head>
 <body>
@@ -43,14 +66,15 @@ button:hover { background:#0d47a1;}
   <input type="date" id="tanggal" required>
 
   <label>Nama Petugas:</label>
-  <input type="text" id="petugas" required placeholder="Nama lengkap">
+  <input type="text" id="petugas" placeholder="Nama lengkap" required>
 
   <label>Nama Lokasi / Panel PJU:</label>
-  <input type="text" id="lokasi" required placeholder="Contoh: Panel PJU Pasar Tamiang Layang">
+  <input type="text" id="lokasi" placeholder="Contoh: Panel PJU Pasar Tamiang Layang" required>
 
   <label>Koordinat Lokasi:</label>
   <input type="text" id="koordinat" readonly required>
   <div id="map"></div>
+
   <button type="button" id="lokasiSaya">📍 Ambil Lokasi Saya</button>
 
   <label>Jenis Kerusakan:</label>
@@ -64,7 +88,7 @@ button:hover { background:#0d47a1;}
     <option value="Tidak Diketahui Kerusakannya">Tidak Diketahui Kerusakannya</option>
   </select>
 
-  <label>Keterangan Tambahan:</label>
+  <label>Keterangan:</label>
   <textarea id="keterangan" rows="3"></textarea>
 
   <label>📸 Foto Lokasi:</label>
@@ -75,32 +99,22 @@ button:hover { background:#0d47a1;}
 
 <div id="msg"></div>
 
-<h2>🗺️ Peta Laporan TINJU (Real-Time)</h2>
-<div id="output-map"></div>
-
-<div id="detail">
-  <h3>📄 Detail Laporan</h3>
-  <p>Sentuh marker di peta untuk melihat detail laporan.</p>
-  <div id="detail-content"></div>
-</div>
-
-<!-- Leaflet JS -->
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script>
 // === KONFIGURASI ===
 const scriptURL = "https://script.google.com/macros/s/AKfycbwcMi_pBDlXeEzS5wxpIuiRmDjvkiwjgR53TmcfhGyi0DcKTSj3sgGXxfmPEpbVhUgg4g/exec";        // URL WebApp dari Apps Script
-const SHEET_URL  = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSDFEv6kQAnSf1m5AqA8KEYLe_0kxrquAXV13H3xqjBvxcdJObwTgN-A8gfaHLDcvEjS9AQwESTeRvO/pubhtml?widget=true&amp;headers=false";  // URL CSV publik Google Sheet kamu
 
 window.onload = () => {
   // === PETA INPUT ===
   const map = L.map('map').setView([-2.13, 115.10], 9);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution:'© OpenStreetMap'
+    maxZoom: 19,
+    attribution: '© OpenStreetMap'
   }).addTo(map);
   let marker;
 
   // Klik peta manual
-  map.on('click', e=>{
+  map.on('click', e => {
     const lat = e.latlng.lat.toFixed(6);
     const lng = e.latlng.lng.toFixed(6);
     document.getElementById('koordinat').value = `${lat}, ${lng}`;
@@ -108,21 +122,23 @@ window.onload = () => {
     marker = L.marker(e.latlng).addTo(map).bindPopup(`📍 ${lat}, ${lng}`).openPopup();
   });
 
-  // Tombol Lokasi Saya
-  document.getElementById('lokasiSaya').addEventListener('click', ()=>{
+  // Tombol Lokasi Saya di bawah peta
+  document.getElementById('lokasiSaya').addEventListener('click', () => {
     if (!navigator.geolocation) return alert("GPS tidak didukung browser ini.");
-    navigator.geolocation.getCurrentPosition(pos=>{
+    navigator.geolocation.getCurrentPosition(pos => {
       const lat = pos.coords.latitude.toFixed(6);
       const lng = pos.coords.longitude.toFixed(6);
-      map.setView([lat,lng], 17);
+      map.setView([lat, lng], 17);
       document.getElementById('koordinat').value = `${lat}, ${lng}`;
       if (marker) map.removeLayer(marker);
-      marker = L.marker([lat,lng]).addTo(map).bindPopup(`📍 Lokasi Anda<br>${lat}, ${lng}`).openPopup();
+      marker = L.marker([lat, lng]).addTo(map).bindPopup(`📍 Lokasi Anda<br>${lat}, ${lng}`).openPopup();
+    }, () => {
+      alert("Gagal mendapatkan lokasi. Aktifkan GPS atau izinkan lokasi.");
     });
   });
 
   // === KIRIM DATA ===
-  document.getElementById('tinjuForm').addEventListener('submit', e=>{
+  document.getElementById('tinjuForm').addEventListener('submit', e => {
     e.preventDefault();
     const fotoFile = document.getElementById('foto').files[0];
     const formData = new FormData();
@@ -136,49 +152,20 @@ window.onload = () => {
     }));
     if (fotoFile) formData.append('foto', fotoFile);
 
-    fetch(scriptURL, { method:'POST', body:formData })
-      .then(r=>r.json())
-      .then(res=>{
-        document.getElementById('msg').innerHTML =
-          res.status==="success" ? "✅ Data & foto berhasil dikirim!" : "⚠️ "+res.message;
-        e.target.reset();
+    fetch(scriptURL, { method: 'POST', body: formData })
+      .then(r => r.json())
+      .then(res => {
+        if (res.status === "success") {
+          document.getElementById('msg').innerHTML = "✅ Data berhasil dikirim!";
+          e.target.reset();
+        } else {
+          document.getElementById('msg').innerHTML = "⚠️ " + res.message;
+        }
       })
-      .catch(err=>{
-        document.getElementById('msg').innerHTML="❌ Gagal mengirim data!";
+      .catch(err => {
+        document.getElementById('msg').innerHTML = "❌ Gagal mengirim data!";
         console.error(err);
       });
-  });
-
-  // === PETA OUTPUT ===
-  const outMap = L.map('output-map').setView([-2.13,115.10],9);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap'}).addTo(outMap);
-
-  fetch(SHEET_URL)
-  .then(res=>res.text())
-  .then(csv=>{
-    const rows = csv.split("\n").slice(1);
-    rows.forEach(row=>{
-      const cols = row.split(",");
-      if(cols.length<7) return;
-      const [tgl,petugas,lokasi,koordinat,jenis,ket,fotoUrl] = cols;
-      if(!koordinat.includes(",")) return;
-      const [lat,lng] = koordinat.split(",").map(parseFloat);
-      const m = L.circleMarker([lat,lng],{radius:8,color:"#1976d2",fillOpacity:0.7}).addTo(outMap);
-      m.on('click',()=>{
-        const fotoHtml = fotoUrl?`<br><img src="${fotoUrl}" width="150">`:"";
-        m.bindPopup(`<b>${lokasi}</b><br>${jenis}${fotoHtml}`).openPopup();
-        document.getElementById('detail-content').innerHTML = `
-          <table style="width:100%;font-size:14px;">
-            <tr><td><b>📅</b></td><td>${tgl}</td></tr>
-            <tr><td><b>👷</b></td><td>${petugas}</td></tr>
-            <tr><td><b>📍</b></td><td>${lokasi}</td></tr>
-            <tr><td><b>⚙️</b></td><td>${jenis}</td></tr>
-            <tr><td><b>📝</b></td><td>${ket}</td></tr>
-            <tr><td><b>📌</b></td><td>${lat}, ${lng}</td></tr>
-            ${fotoUrl?`<tr><td><b>📸</b></td><td><a href="${fotoUrl}" target="_blank">Lihat Foto</a></td></tr>`:""}
-          </table>`;
-      });
-    });
   });
 };
 </script>
