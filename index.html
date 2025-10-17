@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TINJU – Monitoring PJU Barito Timur</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet.locatecontrol/dist/L.Control.Locate.min.css" />
+
+<style>
+body { font-family: Arial, sans-serif; background:#f5f7fa; margin:0; padding:0; }
+h2 { text-align:center; background:#1976d2; color:white; padding:10px; margin:0; }
+form {
+  background:white; padding:20px; margin:20px auto;
+  max-width:450px; border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,0.15);
+}
+label { display:block; margin-top:10px; font-weight:bold; }
+input, select, textarea {
+  width:100%; padding:8px; border:1px solid #ccc; border-radius:6px; font-size:14px;
+}
+button {
+  margin-top:15px; width:100%; padding:10px; border:none; border-radius:6px;
+  font-weight:bold; color:white; background:#1976d2; cursor:pointer;
+}
+button:hover { background:#0d47a1; }
+#map, #output-map { height:320px; border-radius:10px; margin-top:10px; }
+#msg { text-align:center; margin-top:10px; font-weight:bold; }
+#detail {
+  background:white; max-width:600px; margin:10px auto; padding:10px;
+  border-radius:10px; box-shadow:0 2px 6px rgba(0,0,0,0.15);
+}
+</style>
+</head>
+
+<body>
+<h2>📋 Monitoring PJU (TINJU) – Kabupaten Barito Timur</h2>
+
+<form id="tinjuForm">
+  <label>Tanggal Pemeriksaan:</label>
+  <input type="date" id="tanggal" required>
+
+  <label>Nama Petugas:</label>
+  <input type="text" name="entry.532940359" placeholder="Nama lengkap" required>
+
+  <label>Nama Lokasi / Panel PJU:</label>
+  <input type="text" name="entry.1399079746" placeholder="Contoh: Panel PJU Pasar Tamiang Layang" required>
+
+  <label>Koordinat Lokasi:</label>
+  <input type="text" id="koordinat" name="entry.1429788159" readonly required>
+
+  <div id="map"></div>
+
+  <label>Jenis Kerusakan:</label>
+  <select id="jenisKerusakan" name="entry.1838698743" required>
+    <option value="">Pilih Jenis Kerusakan</option>
+    <option value="Lampu">Lampu</option>
+    <option value="Jaringan Kabel">Jaringan Kabel</option>
+    <option value="Alat Proteksi & Kontroller">Alat Proteksi & Kontroller</option>
+    <option value="Short Circuit">Short Circuit</option>
+    <option value="Hilang Tegangan Sebelum KWh Meter">Hilang Tegangan Sebelum KWh Meter</option>
+    <option value="Tidak Diketahui Kerusakannya">Tidak Diketahui Kerusakannya</option>
+  </select>
+
+  <label>Keterangan Tambahan:</label>
+  <textarea name="entry.1444426428" rows="3" placeholder="Contoh: Panel utama tidak aktif"></textarea>
+
+  <button type="button" id="lokasiSaya">📍 Ambil Lokasi Saya</button>
+  <button type="submit">✅ Kirim Data</button>
+</form>
+
+<div id="msg"></div>
+
+<h2>🗺️ Peta Laporan TINJU (Real-Time)</h2>
+<div id="output-map"></div>
+
+<div id="detail">
+  <h3>📄 Detail Laporan</h3>
+  <p>Sentuh marker di peta untuk melihat detail laporan.</p>
+  <div id="detail-content"></div>
+</div>
+
+<!-- JS -->
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.locatecontrol/dist/L.Control.Locate.min.js"></script>
+
+<script>
+// === KONFIGURASI ===
+const googleFormURL = "https://docs.google.com/forms/d/e/1FAIpQLSfIg5HRpP_1IVsvpsRf3P2I5WRf7Fi6_LZ7q7HTb8tRcxxYWA/formResponse";
+const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vROrZtu-ngB87XC8VU1etlXSjVGQqu1lGX97_rVekNrsplm6U2F8nbut0IdJKa5WDfIbvX9hdNw7XiD/pub?gid=1007442982&single=true&output=csv";
+
+// === PETA INPUT ===
+const map = L.map('map').setView([-2.13, 115.10], 9);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+let marker;
+map.on('click', e => {
+  const lat = e.latlng.lat.toFixed(6);
+  const lng = e.latlng.lng.toFixed(6);
+  document.getElementById('koordinat').value = `${lat}, ${lng}`;
+  const jenis = document.getElementById('jenisKerusakan').value || "Titik";
+  if (marker) map.removeLayer(marker);
+  marker = L.marker(e.latlng).addTo(map).bindPopup(`📍 ${jenis}<br>${lat}, ${lng}`).openPopup();
+});
+
+document.getElementById('lokasiSaya').addEventListener('click', ()=>{
+  if (!navigator.geolocation) return alert("GPS tidak didukung browser ini.");
+  navigator.geolocation.getCurrentPosition(pos=>{
+    const lat = pos.coords.latitude.toFixed(6);
+    const lng = pos.coords.longitude.toFixed(6);
+    map.setView([lat, lng], 17);
+    document.getElementById('koordinat').value = `${lat}, ${lng}`;
+    const jenis = document.getElementById('jenisKerusakan').value || "Lokasi Saya";
+    if (marker) map.removeLayer(marker);
+    marker = L.marker([lat, lng]).addTo(map)
+      .bindPopup(`📍 ${jenis}<br>${lat}, ${lng}`).openPopup();
+  });
+});
+
+// === KIRIM KE GOOGLE FORM ===
+document.getElementById('tinjuForm').addEventListener('submit', e=>{
+  e.preventDefault();
+  const tgl = new Date(document.getElementById('tanggal').value);
+  const data = new FormData(e.target);
+  data.append('entry.1604147074_year', tgl.getFullYear());
+  data.append('entry.1604147074_month', tgl.getMonth()+1);
+  data.append('entry.1604147074_day', tgl.getDate());
+  fetch(googleFormURL, { method:'POST', body:data, mode:'no-cors' })
+    .then(()=>{ document.getElementById('msg').innerHTML="✅ Data berhasil dikirim!"; e.target.reset(); })
+    .catch(()=>{ document.getElementById('msg').innerHTML="❌ Gagal mengirim data."; });
+});
+
+// === PETA HASIL ===
+const outMap = L.map('output-map').setView([-2.13, 115.10], 9);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(outMap);
+
+function warnaKerusakan(jenis){
+  const warna = {
+    "Lampu":"yellow","Jaringan Kabel":"orange","Alat Proteksi & Kontroller":"red",
+    "Short Circuit":"black","Hilang Tegangan Sebelum KWh Meter":"blue","Tidak Diketahui Kerusakannya":"gray"
+  };
+  return warna[jenis] || "green";
+}
+
+fetch(SHEET_URL)
+  .then(res=>res.text())
+  .then(csv=>{
+    const rows = csv.split("\n").slice(1);
+    rows.forEach(row=>{
+      const cols = row.split(",");
+      if(cols.length < 6) return;
+      const [tgl, petugas, lokasi, koordinat, jenis, ket] = cols;
+      if(!koordinat.includes(",")) return;
+      const [lat,lng] = koordinat.split(",").map(parseFloat);
+      const color = warnaKerusakan(jenis);
+      const m = L.circleMarker([lat,lng],{
+        radius:8, fillColor:color, color:"#000", weight:1, fillOpacity:0.8
+      }).addTo(outMap);
+      m.on('click', ()=>{
+        m.bindPopup(`<b>${lokasi}</b><br>${jenis}`).openPopup();
+        document.getElementById('detail-content').innerHTML = `
+          <table style="width:100%;font-size:14px;">
+            <tr><td><b>📅 Tanggal</b></td><td>${tgl}</td></tr>
+            <tr><td><b>👷 Petugas</b></td><td>${petugas}</td></tr>
+            <tr><td><b>📍 Lokasi</b></td><td>${lokasi}</td></tr>
+            <tr><td><b>⚙️ Jenis Kerusakan</b></td><td>${jenis}</td></tr>
+            <tr><td><b>📝 Keterangan</b></td><td>${ket || "-"}</td></tr>
+            <tr><td><b>📌 Koordinat</b></td><td>${lat.toFixed(6)}, ${lng.toFixed(6)}</td></tr>
+          </table>`;
+        document.getElementById('detail').scrollIntoView({ behavior:'smooth' });
+      });
+    });
+  });
+</script>
+</body>
+</html>
