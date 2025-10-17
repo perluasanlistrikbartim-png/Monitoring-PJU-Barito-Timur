@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TINJU – Monitoring PJU Barito Timur</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<style>
+body { margin:0; padding:0; font-family: Arial, sans-serif; }
+#map { height: 100vh; }
+.info-box {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: white;
+  padding: 10px 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  font-size: 14px;
+}
+</style>
+</head>
+<body>
+
+<div class="info-box" id="rekap">🔄 Memuat data...</div>
+<div id="map"></div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+// === KONFIGURASI GOOGLE SHEET CSV ===
+// Ganti link di bawah dengan link CSV publik dari Sheet kamu
+const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT8XYZ123abc/pub?output=csv";
+
+// === Warna marker sesuai jenis kerusakan ===
+function warnaKerusakan(jenis) {
+  const colors = {
+    "Lampu": "yellow",
+    "Jaringan Kabel": "orange",
+    "Alat Proteksi & Kontroller": "red",
+    "Short Circuit": "black",
+    "Hilang Tegangan Sebelum KWh Meter": "blue",
+    "Tidak Diketahui Kerusakannya": "gray"
+  };
+  return colors[jenis] || "green";
+}
+
+// === Peta dasar ===
+const map = L.map('map').setView([-2.13, 115.10], 9);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution:'© OpenStreetMap contributors'
+}).addTo(map);
+
+// === Ambil data CSV dari Sheet ===
+fetch(SHEET_URL)
+  .then(res => res.text())
+  .then(csv => {
+    const rows = csv.split("\n").slice(1); // lewati header
+    let total = 0;
+    let rekap = {};
+
+    rows.forEach(row => {
+      const cols = row.split(",");
+
+      const tanggal = cols[0];
+      const petugas = cols[1];
+      const lokasi = cols[2];
+      const koordinat = cols[3];
+      const jenis = cols[4];
+      const ket = cols[5];
+
+      if (!koordinat || !koordinat.includes(",")) return;
+      const [lat, lng] = koordinat.split(",").map(v => parseFloat(v));
+
+      const color = warnaKerusakan(jenis);
+      const marker = L.circleMarker([lat, lng], {
+        radius: 8,
+        fillColor: color,
+        color: "#000",
+        weight: 1,
+        opacity: 1,
+        fillOpacity: 0.8
+      }).addTo(map);
+
+      marker.bindPopup(`
+        <b>${lokasi}</b><br>
+        📅 ${tanggal}<br>
+        👷 ${petugas}<br>
+        ⚙️ ${jenis}<br>
+        📝 ${ket || "-"}
+      `);
+
+      total++;
+      rekap[jenis] = (rekap[jenis] || 0) + 1;
+    });
+
+    // === Tampilkan Rekap di Atas Peta ===
+    let text = `📊 <b>Total Titik:</b> ${total}<br>`;
+    for (const [jenis, jml] of Object.entries(rekap)) {
+      text += `• ${jenis}: ${jml}<br>`;
+    }
+    document.getElementById("rekap").innerHTML = text;
+  })
+  .catch(err => {
+    document.getElementById("rekap").innerHTML = "❌ Gagal memuat data: " + err;
+  });
+</script>
+</body>
+</html>
