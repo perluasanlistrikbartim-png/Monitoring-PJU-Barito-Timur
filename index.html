@@ -1,34 +1,36 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TINJU – Monitoring PJU Barito Timur</title>
-
-<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
 <style>
 body {
   font-family: Arial, sans-serif;
-  background: #f4f7fb;
+  background: #f4f6f9;
   margin: 0;
   padding: 0;
 }
 h2 {
-  text-align: center;
   background: #1976d2;
-  color: white;
+  color: #fff;
   padding: 10px;
-  margin: 0;
+  text-align: center;
 }
 form {
-  background: white;
+  background: #fff;
+  margin: 20px auto;
+  max-width: 480px;
   padding: 20px;
   border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  max-width: 460px;
-  margin: 20px auto;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
 }
-label { display:block; margin-top:10px; font-weight:bold; }
+label {
+  display: block;
+  font-weight: bold;
+  margin-top: 10px;
+}
 input, select, textarea {
   width: 100%;
   padding: 8px;
@@ -37,28 +39,32 @@ input, select, textarea {
   font-size: 14px;
 }
 button {
-  margin-top: 10px;
   width: 100%;
-  padding: 10px;
+  background: #1976d2;
+  color: white;
   border: none;
+  padding: 10px;
   border-radius: 6px;
   font-weight: bold;
-  color: white;
-  background: #1976d2;
+  margin-top: 10px;
   cursor: pointer;
 }
 button:hover { background: #0d47a1; }
 #map {
   height: 320px;
-  border-radius: 10px;
   margin-top: 10px;
-  border: 1px solid #aaa;
+  border: 1px solid #ccc;
+  border-radius: 6px;
 }
-#msg { text-align: center; margin-top: 10px; font-weight: bold; }
+#msg {
+  text-align: center;
+  margin-top: 10px;
+  font-weight: bold;
+}
 </style>
 </head>
-<body>
 
+<body>
 <h2>📋 Monitoring PJU (TINJU) – Kabupaten Barito Timur</h2>
 
 <form id="tinjuForm">
@@ -74,7 +80,6 @@ button:hover { background: #0d47a1; }
   <label>Koordinat Lokasi:</label>
   <input type="text" id="koordinat" readonly required>
   <div id="map"></div>
-
   <button type="button" id="lokasiSaya">📍 Ambil Lokasi Saya</button>
 
   <label>Jenis Kerusakan:</label>
@@ -91,9 +96,6 @@ button:hover { background: #0d47a1; }
   <label>Keterangan:</label>
   <textarea id="keterangan" rows="3"></textarea>
 
-  <label>📸 Foto Lokasi:</label>
-  <input type="file" id="foto" accept="image/*" capture="camera">
-
   <button type="submit">✅ Kirim Data</button>
 </form>
 
@@ -101,15 +103,13 @@ button:hover { background: #0d47a1; }
 
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script>
-// === KONFIGURASI ===
-const scriptURL = "https://script.google.com/macros/s/AKfycbwcMi_pBDlXeEzS5wxpIuiRmDjvkiwjgR53TmcfhGyi0DcKTSj3sgGXxfmPEpbVhUgg4g/exec";        // URL WebApp dari Apps Script
+const scriptURL = "https://script.google.com/macros/s/AKfycbwcMi_pBDlXeEzS5wxpIuiRmDjvkiwjgR53TmcfhGyi0DcKTSj3sgGXxfmPEpbVhUgg4g/exec";
 
 window.onload = () => {
-  // === PETA INPUT ===
+  // === PETA ===
   const map = L.map('map').setView([-2.13, 115.10], 9);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-    attribution: '© OpenStreetMap'
+    maxZoom: 19, attribution: '© OpenStreetMap'
   }).addTo(map);
   let marker;
 
@@ -119,63 +119,52 @@ window.onload = () => {
     const lng = e.latlng.lng.toFixed(6);
     document.getElementById('koordinat').value = `${lat}, ${lng}`;
     if (marker) map.removeLayer(marker);
-    marker = L.marker(e.latlng).addTo(map).bindPopup(`📍 ${lat}, ${lng}`).openPopup();
+    marker = L.marker(e.latlng).addTo(map)
+      .bindPopup(`📍 ${lat}, ${lng}`).openPopup();
   });
 
-  // Tombol Lokasi Saya di bawah peta
+  // Ambil lokasi saya
   document.getElementById('lokasiSaya').addEventListener('click', () => {
     if (!navigator.geolocation) return alert("GPS tidak didukung browser ini.");
     navigator.geolocation.getCurrentPosition(pos => {
       const lat = pos.coords.latitude.toFixed(6);
       const lng = pos.coords.longitude.toFixed(6);
-      map.setView([lat, lng], 17);
       document.getElementById('koordinat').value = `${lat}, ${lng}`;
+      map.setView([lat, lng], 17);
       if (marker) map.removeLayer(marker);
-      marker = L.marker([lat, lng]).addTo(map).bindPopup(`📍 Lokasi Anda<br>${lat}, ${lng}`).openPopup();
-    }, () => {
-      alert("Gagal mendapatkan lokasi. Aktifkan GPS atau izinkan lokasi.");
-    });
+      marker = L.marker([lat, lng]).addTo(map)
+        .bindPopup(`📍 Lokasi Anda<br>${lat}, ${lng}`).openPopup();
+    }, () => alert("Gagal mendapatkan lokasi. Aktifkan GPS."));
   });
 
   // === KIRIM DATA ===
-document.getElementById('tinjuForm').addEventListener('submit', e => {
-  e.preventDefault();
+  document.getElementById('tinjuForm').addEventListener('submit', e => {
+    e.preventDefault();
 
-  const data = {
-    tanggal: document.getElementById('tanggal').value,
-    petugas: document.getElementById('petugas').value,
-    lokasi: document.getElementById('lokasi').value,
-    koordinat: document.getElementById('koordinat').value,
-    jenis: document.getElementById('jenis').value,
-    keterangan: document.getElementById('keterangan').value
-  };
+    const params = new URLSearchParams();
+    params.append('tanggal', document.getElementById('tanggal').value);
+    params.append('petugas', document.getElementById('petugas').value);
+    params.append('lokasi', document.getElementById('lokasi').value);
+    params.append('koordinat', document.getElementById('koordinat').value);
+    params.append('jenis', document.getElementById('jenis').value);
+    params.append('keterangan', document.getElementById('keterangan').value);
 
-  fetch(scriptURL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data)
-  })
-  .then(async r => {
-    let res;
-    try { res = await r.json(); }
-    catch { throw new Error("Respon bukan JSON"); }
-
-    if (res.status === "success") {
-      document.getElementById('msg').innerHTML = "✅ Data berhasil dikirim!";
-      e.target.reset();
-    } else {
-      document.getElementById('msg').innerHTML = "⚠️ " + res.message;
-    }
-  })
-  .catch(err => {
-    console.error("Kesalahan:", err);
-    document.getElementById('msg').innerHTML = "❌ Gagal mengirim data!";
+    fetch(scriptURL, { method: 'POST', body: params })
+      .then(res => res.text())
+      .then(text => {
+        if (text.trim() === "OK") {
+          document.getElementById('msg').innerHTML = "✅ Data berhasil dikirim!";
+          e.target.reset();
+        } else {
+          document.getElementById('msg').innerHTML = "⚠️ Gagal menyimpan data.";
+        }
+      })
+      .catch(err => {
+        document.getElementById('msg').innerHTML = "❌ Gagal mengirim data!";
+        console.error("Error:", err);
+      });
   });
-});
-
 };
 </script>
 </body>
 </html>
-
-
