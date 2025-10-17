@@ -9,23 +9,17 @@
 body { font-family: Arial, sans-serif; background: #f4f6f9; margin: 0; }
 h2 { background: #1976d2; color: #fff; padding: 10px; text-align: center; }
 form {
-  background: #fff;
-  margin: 20px auto;
-  max-width: 480px;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  background: #fff; margin: 20px auto; max-width: 480px; padding: 20px;
+  border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);
 }
 label { display:block; margin-top:10px; font-weight:bold; }
-input, select, textarea {
-  width:100%; padding:8px; border:1px solid #ccc; border-radius:6px;
-}
+input, select, textarea { width:100%; padding:8px; border:1px solid #ccc; border-radius:6px; }
 button {
   width:100%; margin-top:10px; background:#1976d2; color:#fff;
   border:none; padding:10px; border-radius:6px; cursor:pointer; font-weight:bold;
 }
 button:hover { background:#0d47a1; }
-#map { height:300px; border-radius:6px; margin-top:10px; }
+#map, #mapData { height:300px; border-radius:6px; margin-top:10px; }
 #msg { text-align:center; font-weight:bold; margin-top:10px; }
 </style>
 </head>
@@ -33,6 +27,7 @@ button:hover { background:#0d47a1; }
 <body>
 <h2>📋 Monitoring PJU (TINJU) – Kabupaten Barito Timur</h2>
 
+<!-- 🔹 Form Input -->
 <form id="tinjuForm" enctype="multipart/form-data">
   <label>Tanggal:</label>
   <input type="date" id="tanggal" required>
@@ -71,17 +66,21 @@ button:hover { background:#0d47a1; }
 
 <div id="msg"></div>
 
+<!-- 🔹 Peta Data Read-Only -->
+<h2>🗺️ Data PJU yang sudah masuk</h2>
+<div id="mapData"></div>
+
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script>
 const scriptURL = "https://script.google.com/macros/s/AKfycbwcMi_pBDlXeEzS5wxpIuiRmDjvkiwjgR53TmcfhGyi0DcKTSj3sgGXxfmPEpbVhUgg4g/exec";
 
 window.onload = () => {
-  // === Inisialisasi Peta ===
+  // === PETA INPUT ===
   const map = L.map('map').setView([-2.13, 115.10], 9);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
   let marker;
 
-  // Klik manual di peta
+  // Klik manual
   map.on('click', e => {
     const lat = e.latlng.lat.toFixed(6);
     const lng = e.latlng.lng.toFixed(6);
@@ -90,7 +89,7 @@ window.onload = () => {
     marker = L.marker(e.latlng).addTo(map).bindPopup(`📍 ${lat}, ${lng}`).openPopup();
   });
 
-  // Ambil lokasi GPS
+  // Ambil posisi GPS
   document.getElementById('lokasiSaya').addEventListener('click', () => {
     if (!navigator.geolocation) return alert("GPS tidak didukung browser ini.");
     navigator.geolocation.getCurrentPosition(pos => {
@@ -100,10 +99,10 @@ window.onload = () => {
       document.getElementById('koordinat').value = `${lat}, ${lng}`;
       if (marker) map.removeLayer(marker);
       marker = L.marker([lat, lng]).addTo(map).bindPopup(`📍 Lokasi Anda<br>${lat}, ${lng}`).openPopup();
-    }, () => alert("Gagal mengambil lokasi. Pastikan GPS aktif."));
+    }, () => alert("Gagal mendapatkan lokasi."));
   });
 
-  // === Kirim Data ke Apps Script ===
+  // === Kirim Data ===
   document.getElementById('tinjuForm').addEventListener('submit', e => {
     e.preventDefault();
     const formData = new FormData();
@@ -124,6 +123,7 @@ window.onload = () => {
         if (r.status === "success") {
           document.getElementById('msg').innerHTML = "✅ Data & foto berhasil dikirim!";
           e.target.reset();
+          loadData(); // refresh peta output
         } else {
           document.getElementById('msg').innerHTML = "⚠️ Gagal: " + r.message;
         }
@@ -132,6 +132,37 @@ window.onload = () => {
         document.getElementById('msg').innerHTML = "❌ Gagal kirim: " + err;
       });
   });
+
+  // === PETA DATA OUTPUT (Read Only) ===
+  const mapData = L.map('mapData').setView([-2.13, 115.10], 9);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(mapData);
+
+  // 🔹 Fungsi memuat data dari Sheet (GET)
+  async function loadData() {
+    try {
+      const res = await fetch(scriptURL);
+      const data = await res.json();
+      mapData.eachLayer(l => { if (l instanceof L.Marker) mapData.removeLayer(l); });
+
+      data.forEach(d => {
+        if (!d.koordinat) return;
+        const [lat, lng] = d.koordinat.split(",").map(x => parseFloat(x));
+        const popup = `
+          <b>${d.lokasi}</b><br>
+          🧍 ${d.petugas}<br>
+          📅 ${d.tanggal}<br>
+          ⚙️ ${d.jenis}<br>
+          📝 ${d.keterangan}<br>
+          ${d.foto ? `<a href="${d.foto}" target="_blank">📸 Lihat Foto</a>` : ''}
+        `;
+        L.marker([lat, lng]).addTo(mapData).bindPopup(popup);
+      });
+    } catch (err) {
+      console.error("Gagal memuat data:", err);
+    }
+  }
+
+  loadData(); // pertama kali load
 };
 </script>
 </body>
