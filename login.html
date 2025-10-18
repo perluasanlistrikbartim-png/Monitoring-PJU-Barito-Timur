@@ -3,134 +3,125 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>⚡ Login – TINJU Barito Timur</title>
+<title>⚡ Login – TINJU PJU Barito Timur</title>
 <style>
 body {
   margin: 0;
-  font-family: 'Segoe UI', sans-serif;
-  background: radial-gradient(circle at center, #050505 0%, #0a0a0a 100%);
+  font-family: 'Poppins', sans-serif;
   height: 100vh;
-  overflow: hidden;
-  color: #fff;
-}
-.container {
   display: flex;
-  flex-direction: column;
-  align-items: center;
   justify-content: center;
-  height: 100%;
-  text-align: center;
+  align-items: center;
+  background: radial-gradient(circle at 50% 30%, #0a0f1a, #000);
+  overflow: hidden;
 }
-h1 {
-  font-size: 2em;
-  color: #0ff;
-  text-shadow: 0 0 15px #00ffff, 0 0 40px #00e5ff;
-}
-form {
-  background: rgba(0,0,0,0.7);
-  border: 1px solid #00eaff;
+.login-box {
+  background: rgba(15, 25, 40, 0.85);
+  border: 1px solid rgba(0,255,255,0.3);
   border-radius: 12px;
-  padding: 30px;
-  width: 280px;
-  box-shadow: 0 0 25px #00ffff88;
+  padding: 30px 40px;
+  box-shadow: 0 0 15px rgba(0,255,255,0.3), inset 0 0 10px rgba(0,255,255,0.1);
+  text-align: center;
+  animation: pulse 3s infinite;
+}
+@keyframes pulse {
+  0% { box-shadow: 0 0 10px #0ff; }
+  50% { box-shadow: 0 0 25px #00f6ff; }
+  100% { box-shadow: 0 0 10px #0ff; }
+}
+h2 {
+  color: #00eaff;
+  text-shadow: 0 0 10px #00eaff;
 }
 input {
   width: 100%;
   padding: 10px;
-  margin-top: 10px;
-  border: none;
-  border-radius: 6px;
-  background: #111;
+  margin-top: 15px;
+  background: #000;
+  border: 1px solid #00eaff;
   color: #0ff;
-  font-size: 15px;
-  outline: none;
-  box-shadow: inset 0 0 10px #00eaff55;
+  border-radius: 8px;
+  font-size: 16px;
+  text-align: center;
 }
 button {
-  margin-top: 15px;
   width: 100%;
+  margin-top: 20px;
   padding: 10px;
-  background: linear-gradient(90deg, #00e5ff, #0077ff);
+  background: linear-gradient(90deg,#00eaff,#007bff);
   border: none;
-  color: #fff;
-  font-weight: bold;
   border-radius: 8px;
+  color: white;
+  font-size: 16px;
   cursor: pointer;
-  box-shadow: 0 0 20px #00eaff88;
-  transition: all 0.3s;
+  transition: 0.3s;
 }
 button:hover {
-  transform: scale(1.05);
-  box-shadow: 0 0 35px #00ffffaa;
+  box-shadow: 0 0 10px #00eaff;
 }
 #msg {
   margin-top: 10px;
-  font-size: 14px;
-  color: #f88;
+  color: #ff8080;
 }
 .lightning {
   position: absolute;
   width: 2px;
-  height: 120px;
-  background: linear-gradient(to bottom, #00eaff, transparent);
-  opacity: 0.6;
-  animation: flicker 0.8s infinite;
+  height: 80vh;
+  left: 50%;
+  top: -80vh;
+  background: linear-gradient(180deg, transparent, #0ff, transparent);
+  animation: strike 3s infinite linear;
+  opacity: 0.5;
 }
-@keyframes flicker {
-  0%, 100% {opacity: 0.2; transform: scaleY(0.8);}
-  50% {opacity: 1; transform: scaleY(1.2);}
+@keyframes strike {
+  0%, 100% { transform: translateY(-100vh); opacity: 0; }
+  10% { transform: translateY(0); opacity: 1; }
+  20% { transform: translateY(50vh); opacity: 0; }
 }
 </style>
 </head>
 <body>
-<div class="container">
-  <h1>⚡ TINJU LOGIN ⚡</h1>
-  <form id="loginForm">
-    <input type="text" id="username" placeholder="👤 Username" required>
-    <input type="password" id="password" placeholder="🔒 Password" required>
-    <button type="submit">LOGIN</button>
-    <div id="msg"></div>
-  </form>
+<div class="lightning"></div>
+<div class="login-box">
+  <h2>⚡ LOGIN PANEL PJU ⚡</h2>
+  <input id="username" type="text" placeholder="👤 Username">
+  <input id="password" type="password" placeholder="🔑 Password">
+  <button onclick="login()">Masuk</button>
+  <div id="msg"></div>
 </div>
+
 <script>
 const scriptURL =
   "https://broad-queen-be12.perluasanlistrik-bartim.workers.dev/?url=" +
   encodeURIComponent("https://script.google.com/macros/s/AKfycbwcMi_pBDlXeEzS5wxpIuiRmDjvkiwjgR53TmcfhGyi0DcKTSj3sgGXxfmPEpbVhUgg4g/exec");
 
-document.getElementById('loginForm').addEventListener('submit', async e => {
-  e.preventDefault();
-  const username = document.getElementById('username').value;
-  const password = document.getElementById('password').value;
+async function login() {
+  const username = document.getElementById('username').value.trim();
+  const password = document.getElementById('password').value.trim();
   const msg = document.getElementById('msg');
-  msg.textContent = "⏳ Memverifikasi...";
+  msg.textContent = "⚙️ Memverifikasi...";
 
   try {
     const res = await fetch(scriptURL, {
       method: "POST",
-      headers: {"Content-Type": "application/json"},
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action: "login", username, password })
     });
     const r = await res.json();
-    if (r.status === "success") {
-      localStorage.setItem("petugas", r.nama);
-      localStorage.setItem("role", r.role);
-      window.location.href = "index.html";
+
+    if (r.status === 'success') {
+      localStorage.setItem('petugas', r.nama);
+      localStorage.setItem('role', r.role);
+      msg.style.color = "#00ffcc";
+      msg.textContent = "✅ Berhasil! Mengalihkan...";
+      setTimeout(() => window.location.href = 'index.html', 1000);
     } else {
-      msg.textContent = "⚠️ " + r.message;
+      msg.textContent = "❌ " + r.message;
     }
   } catch (err) {
-    msg.textContent = "❌ Gagal konek server.";
+    msg.textContent = "🚫 Gagal terhubung ke server.";
   }
-});
-
-// ⚡ efek petir
-setInterval(() => {
-  const bolt = document.createElement('div');
-  bolt.classList.add('lightning');
-  bolt.style.left = Math.random() * window.innerWidth + 'px';
-  document.body.appendChild(bolt);
-  setTimeout(() => bolt.remove(), 500);
-}, 700);
+}
 </script>
 </body>
 </html>
