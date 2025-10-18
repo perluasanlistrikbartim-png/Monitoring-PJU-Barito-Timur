@@ -6,33 +6,94 @@
 <title>TINJU ⚡ Monitoring PJU Barito Timur</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <style>
-body{font-family:"Segoe UI",sans-serif;margin:0;background:radial-gradient(circle at center,#000015,#000);color:#0ff}
-header{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;background:linear-gradient(90deg,#0033ff,#00e6ff);color:#fff;box-shadow:0 0 20px #00ffff}
-h1{font-size:18px;margin:0}
-#userInfo{display:flex;gap:10px;align-items:center}
-#logoutBtn{background:linear-gradient(90deg,#ff0066,#ff6600);border:none;border-radius:8px;padding:6px 10px;color:#fff;font-weight:700;cursor:pointer;box-shadow:0 0 10px #ff3366}
-#logoutBtn:hover{box-shadow:0 0 20px #ff6600}
+body {
+  font-family: "Segoe UI", sans-serif;
+  background: radial-gradient(circle at center, #000010, #000);
+  color: #0ff;
+  margin: 0;
+}
+header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 12px 18px;
+  background: linear-gradient(90deg, #0033ff, #00e6ff);
+  color: #fff;
+  box-shadow: 0 0 15px #00ffff;
+}
+h1 { font-size: 18px; margin: 0; }
+#userInfo { display: flex; align-items: center; gap: 10px; }
+#logoutBtn {
+  background: linear-gradient(90deg, #ff0066, #ff6600);
+  color: #fff; font-weight: 700; border: none;
+  padding: 6px 12px; border-radius: 8px;
+  box-shadow: 0 0 10px #ff3366;
+  cursor: pointer;
+}
+#logoutBtn:hover { box-shadow: 0 0 20px #ff6600; }
 
-.container{max-width:1100px;margin:16px auto;padding:0 12px}
-.card{background:rgba(0,0,20,.9);border:2px solid #00ffff55;border-radius:14px;box-shadow:0 0 24px #00ffff33;padding:16px;margin-bottom:16px;position:relative;overflow:hidden}
-.card::before{content:"";position:absolute;inset:-2px;border-radius:16px;border:2px solid #00ffff;filter:blur(10px);opacity:.45;animation:edge 3s linear infinite}
-@keyframes edge{0%,100%{opacity:.4}50%{opacity:1}}
+.container {
+  max-width: 1000px; margin: 20px auto; padding: 0 12px;
+}
+.card {
+  background: rgba(0, 0, 25, 0.9);
+  border: 2px solid #00ffff55;
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow: 0 0 20px #00ffff33;
+  position: relative;
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+.card::before {
+  content: "";
+  position: absolute; inset: -2px;
+  border-radius: 16px;
+  border: 2px solid #00ffff;
+  filter: blur(10px);
+  opacity: .45;
+  animation: edge 3s linear infinite;
+}
+@keyframes edge { 0%,100%{opacity:.3} 50%{opacity:1} }
 
-label{display:block;margin-top:8px;font-weight:700}
-input,select,textarea{width:100%;padding:8px;border:1px solid #00ffff55;border-radius:8px;background:#001122;color:#0ff}
-input::placeholder{color:#00cccc99}
-button.primary{width:100%;margin-top:10px;background:linear-gradient(90deg,#0066ff,#00ffff);border:none;padding:10px;color:#000;font-weight:700;border-radius:8px;cursor:pointer;box-shadow:0 0 12px #00ffff}
-button.primary:hover{box-shadow:0 0 22px #00ffff}
-#map,#mapData{height:320px;border-radius:10px;border:1px solid #00ffff44;margin-top:8px}
-#msg{margin-top:8px;font-weight:700;text-align:center}
-.grid{display:grid;grid-template-columns:1fr;gap:16px}
-@media(min-width:900px){.grid{grid-template-columns:1fr 1fr}}
-.legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
-.badge{display:inline-flex;align-items:center;gap:6px;background:#001828;border:1px solid #00ffff44;border-radius:999px;padding:4px 10px}
-.badge i{width:10px;height:10px;border-radius:50%}
+label { display: block; margin-top: 10px; font-weight: bold; }
+input, select, textarea {
+  width: 100%; padding: 8px;
+  border: 1px solid #00ffff55;
+  border-radius: 8px;
+  background: #001122;
+  color: #0ff;
+}
+button.primary {
+  width: 100%; margin-top: 12px;
+  background: linear-gradient(90deg, #0066ff, #00ffff);
+  color: #000; font-weight: bold;
+  border: none; padding: 10px;
+  border-radius: 8px; cursor: pointer;
+  box-shadow: 0 0 15px #00ffff;
+}
+button.primary:hover { box-shadow: 0 0 25px #00ffff; }
+
+#map, #mapData {
+  height: 300px;
+  border-radius: 10px;
+  margin-top: 8px;
+  border: 1px solid #00ffff44;
+}
+#msg { text-align: center; margin-top: 8px; font-weight: 700; }
+.grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
+@media(min-width:900px){ .grid{grid-template-columns:1fr 1fr;} }
+
+.legend { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: #001828; border: 1px solid #00ffff44;
+  border-radius: 999px; padding: 4px 10px;
+}
+.badge i { width: 10px; height: 10px; border-radius: 50%; }
 </style>
 </head>
+
 <body>
 <header>
   <h1>⚡ TINJU – Monitoring PJU Barito Timur</h1>
@@ -46,54 +107,49 @@ button.primary:hover{box-shadow:0 0 22px #00ffff}
   <!-- Form Input -->
   <section class="card">
     <h3>📝 Input Laporan</h3>
-    <div class="grid">
-      <div>
-        <label>Tanggal</label>
-        <input type="date" id="tanggal" required>
-      </div>
-      <div>
-        <label>Petugas</label>
-        <input type="text" id="petugas" readonly required>
-      </div>
-    </div>
+    <label>Tanggal</label>
+    <input type="date" id="tanggal" required>
+
+    <label>Petugas</label>
+    <input type="text" id="petugas" readonly required>
 
     <label>Nama Lokasi / Panel</label>
-    <input type="text" id="lokasi" placeholder="Contoh: Panel PJU Pasar Tamiang Layang" required>
+    <input type="text" id="lokasi" required placeholder="Contoh: Panel PJU Pasar Tamiang Layang">
 
     <label>Koordinat</label>
-    <input type="text" id="koordinat" placeholder="📍 Tekan Ambil Lokasi Saya" readonly required>
+    <input type="text" id="koordinat" readonly required placeholder="📍 Ambil lokasi di peta atau tombol bawah">
     <div id="map"></div>
-    <button class="primary" type="button" id="lokasiSaya">📍 Ambil Lokasi Saya</button>
+    <button type="button" class="primary" id="lokasiSaya">📍 Ambil Lokasi Saya</button>
 
     <label>Jenis Kerusakan</label>
     <select id="jenis" required>
-      <option value="">Pilih Jenis Kerusakan</option>
-      <option value="Lampu">Lampu</option>
-      <option value="Jaringan Kabel">Jaringan Kabel</option>
-      <option value="Kontroller/Proteksi">Kontroller/Proteksi</option>
-      <option value="Short Circuit">Short Circuit</option>
-      <option value="Hilang Tegangan">Hilang Tegangan</option>
-      <option value="Tidak Diketahui">Tidak Diketahui</option>
+      <option value="">Pilih Jenis</option>
+      <option>Lampu</option>
+      <option>Jaringan Kabel</option>
+      <option>Kontroller/Proteksi</option>
+      <option>Short Circuit</option>
+      <option>Hilang Tegangan</option>
+      <option>Tidak Diketahui</option>
     </select>
 
     <label>Keterangan</label>
-    <textarea id="keterangan" rows="3" placeholder="Catatan lapangan..."></textarea>
+    <textarea id="keterangan" rows="3"></textarea>
 
-    <label>📸 Foto Lokasi</label>
+    <label>📸 Upload Foto</label>
     <input type="file" id="foto" accept="image/*" capture="environment">
 
     <button class="primary" id="submitBtn">✅ Kirim Data</button>
     <div id="msg"></div>
   </section>
 
-  <!-- Statistik & Peta Output -->
+  <!-- Statistik -->
   <section class="card">
-    <h3>📊 Statistik & Peta Laporan</h3>
+    <h3>📊 Statistik & Peta</h3>
     <div class="legend">
       <span class="badge"><i style="background:gold"></i> Lampu</span>
-      <span class="badge"><i style="background:#ff4d4d"></i> Jaringan Kabel</span>
-      <span class="badge"><i style="background:#00e6ff"></i> Kontroller/Proteksi</span>
-      <span class="badge"><i style="background:orange"></i> Short Circuit</span>
+      <span class="badge"><i style="background:#ff4d4d"></i> Kabel</span>
+      <span class="badge"><i style="background:#00e6ff"></i> Proteksi</span>
+      <span class="badge"><i style="background:orange"></i> Short</span>
       <span class="badge"><i style="background:plum"></i> Hilang Tegangan</span>
       <span class="badge"><i style="background:#ddd"></i> Tidak Diketahui</span>
     </div>
@@ -105,207 +161,157 @@ button.primary:hover{box-shadow:0 0 22px #00ffff}
 </div>
 
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-
 <script>
-
 const proxy = "https://broad-queen-be12.perluasanlistrik-bartim.workers.dev/?url=";
 const scriptURL = "https://script.google.com/macros/s/AKfycbwcMi_pBDlXeEzS5wxpIuiRmDjvkiwjgR53TmcfhGyi0DcKTSj3sgGXxfmPEpbVhUgg4g/exec";
 
-window.onload = () => {
-  const namaLogin = localStorage.getItem("petugas");
-  const roleLogin = localStorage.getItem("role");
-
-  if (!namaLogin || !roleLogin) {
-    // kosong → arahkan ke login
+window.addEventListener("DOMContentLoaded", () => {
+  const nama = localStorage.getItem("petugas");
+  const role = localStorage.getItem("role");
+  if (!nama || !role) {
     localStorage.clear();
     window.location.href = "login.html";
     return;
   }
 
-  // tampilkan identitas
-  document.getElementById("namaUser").textContent = namaLogin;
-  document.getElementById("roleUser").textContent = roleLogin;
-
-  // tombol logout
+  document.getElementById("namaUser").textContent = nama;
+  document.getElementById("roleUser").textContent = role;
   document.getElementById("logoutBtn").onclick = () => {
     localStorage.clear();
     window.location.href = "login.html";
   };
 
-  // isi field form
   document.getElementById("tanggal").value = new Date().toISOString().slice(0,10);
-  document.getElementById("petugas").value = namaLogin;
+  document.getElementById("petugas").value = nama;
 
-  // lanjutkan loadData() setelah login valid
-  loadData(true);
-};
+  initMaps(nama, role);
+});
 
-// Prefill tanggal & petugas
-document.getElementById("tanggal").value = new Date().toISOString().slice(0,10);
-document.getElementById("petugas").value = namaLogin;
+function initMaps(namaLogin, roleLogin) {
+  // === PETA INPUT ===
+  const map = L.map("map").setView([-2.13, 115.10], 9);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+  let marker;
 
-// Peta input
-const map = L.map('map').setView([-2.13, 115.10], 9);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
-let inputMarker = null;
-map.on('click', e => setKoordinat(e.latlng.lat, e.latlng.lng));
-document.getElementById('lokasiSaya').onclick = () => {
-  if (!navigator.geolocation) return alert("Perangkat tidak mendukung GPS.");
-  navigator.geolocation.getCurrentPosition(pos => {
-    setKoordinat(pos.coords.latitude, pos.coords.longitude, true);
-  }, () => alert("Gagal mengambil lokasi. Mohon izinkan akses lokasi."));
-};
-function setKoordinat(lat, lng, focus=false) {
-  const latF = Number(lat).toFixed(6), lngF = Number(lng).toFixed(6);
-  document.getElementById('koordinat').value = `${latF}, ${lngF}`;
-  if (focus) map.setView([latF, lngF], 17);
-  if (inputMarker) map.removeLayer(inputMarker);
-  inputMarker = L.marker([latF, lngF]).addTo(map).bindPopup(`📍 ${latF}, ${lngF}`).openPopup();
-}
-
-// Submit data
-document.getElementById("submitBtn").onclick = async () => {
-  const koordinat = document.getElementById('koordinat').value.trim();
-  const lokasi = document.getElementById('lokasi').value.trim();
-  if (!koordinat) { alert("⚠️ Ambil koordinat terlebih dahulu."); return; }
-  if (!lokasi) { alert("⚠️ Nama lokasi wajib diisi."); return; }
-
-  let fotoBase64 = "";
-  const file = document.getElementById('foto').files[0];
-  if (file) {
-    fotoBase64 = await new Promise((resolve, reject) => {
-      const r = new FileReader();
-      r.onload = () => resolve(r.result);
-      r.onerror = reject;
-      r.readAsDataURL(file);
-    });
+  function setKoordinat(lat, lng, zoom) {
+    document.getElementById("koordinat").value = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+    if (marker) map.removeLayer(marker);
+    marker = L.marker([lat, lng]).addTo(map).bindPopup(`📍 ${lat.toFixed(6)}, ${lng.toFixed(6)}`).openPopup();
+    if (zoom) map.setView([lat, lng], 17);
   }
 
-  const payload = {
-    action: "upload",
-    tanggal: document.getElementById('tanggal').value,
-    petugas: namaLogin,
-    lokasi: lokasi,
-    koordinat: koordinat,
-    jenis: document.getElementById('jenis').value,
-    keterangan: document.getElementById('keterangan').value,
-    fotoBase64: fotoBase64
+  map.on("click", e => setKoordinat(e.latlng.lat, e.latlng.lng));
+  document.getElementById("lokasiSaya").onclick = () => {
+    if (!navigator.geolocation) return alert("Perangkat tidak mendukung GPS");
+    navigator.geolocation.getCurrentPosition(
+      pos => setKoordinat(pos.coords.latitude, pos.coords.longitude, true),
+      () => alert("Tidak bisa mengambil lokasi")
+    );
   };
 
-  const msg = document.getElementById("msg");
-  msg.textContent = "⏳ Mengirim...";
-  try {
-    const res = await fetch(proxy + scriptURL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
-    const r = await res.json();
-    if (r.status === "success") {
-      msg.textContent = "✅ Data tersimpan!";
-      // reset minimal (jangan reset petugas & tanggal)
-      document.getElementById('lokasi').value = "";
-      document.getElementById('koordinat').value = "";
-      document.getElementById('jenis').value = "";
-      document.getElementById('keterangan').value = "";
-      document.getElementById('foto').value = "";
-      if (inputMarker) { map.removeLayer(inputMarker); inputMarker = null; }
-      await loadData(true);
-    } else {
-      msg.textContent = "⚠️ Gagal: " + (r.message || "server error");
+  // === SUBMIT DATA ===
+  document.getElementById("submitBtn").onclick = async () => {
+    const koordinat = document.getElementById("koordinat").value.trim();
+    if (!koordinat) return alert("⚠️ Ambil koordinat dulu!");
+
+    let fotoBase64 = "";
+    const file = document.getElementById("foto").files[0];
+    if (file) {
+      fotoBase64 = await new Promise((resolve, reject) => {
+        const r = new FileReader();
+        r.onload = () => resolve(r.result);
+        r.onerror = reject;
+        r.readAsDataURL(file);
+      });
     }
-  } catch (err) {
-    msg.textContent = "❌ Gagal kirim (network)";
-  }
-};
 
-// Peta output + Chart
-const mapData = L.map('mapData').setView([-2.13,115.10], 9);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom:19 }).addTo(mapData);
-let chartRef = null;
-let markersLayer = L.layerGroup().addTo(mapData);
+    const data = {
+      action: "upload",
+      tanggal: document.getElementById("tanggal").value,
+      petugas: namaLogin,
+      lokasi: document.getElementById("lokasi").value,
+      koordinat: koordinat,
+      jenis: document.getElementById("jenis").value,
+      keterangan: document.getElementById("keterangan").value,
+      fotoBase64
+    };
 
-const ICONS = {
-  "Lampu": "https://cdn-icons-png.flaticon.com/512/702/702814.png",
-  "Jaringan Kabel": "https://cdn-icons-png.flaticon.com/512/2504/2504959.png",
-  "Kontroller/Proteksi": "https://cdn-icons-png.flaticon.com/512/3039/3039386.png",
-  "Short Circuit": "https://cdn-icons-png.flaticon.com/512/1532/1532802.png",
-  "Hilang Tegangan": "https://cdn-icons-png.flaticon.com/512/2910/2910768.png",
-  "Tidak Diketahui": "https://cdn-icons-png.flaticon.com/512/929/929430.png"
-};
+    const msg = document.getElementById("msg");
+    msg.textContent = "⏳ Mengirim data...";
+    try {
+      const res = await fetch(proxy + scriptURL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      });
+      const r = await res.json();
+      msg.textContent = (r.status === "success")
+        ? "✅ Data tersimpan!"
+        : "⚠️ Gagal: " + r.message;
+      loadData(roleLogin, namaLogin);
+    } catch {
+      msg.textContent = "❌ Gagal koneksi!";
+    }
+  };
 
-async function loadData(centerToFirst=false) {
-  try {
-    const res = await fetch(proxy + scriptURL);
-    const data = await res.json();
+  // === OUTPUT DATA ===
+  const mapData = L.map("mapData").setView([-2.13, 115.10], 9);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapData);
+  const layerGroup = L.layerGroup().addTo(mapData);
+  let chartRef = null;
 
-    // Filter jika petugas (lihat datanya sendiri)
-    const rows = (roleLogin === "petugas")
-      ? data.filter(d => (d.petugas || "").trim() === (namaLogin || "").trim())
-      : data;
+  async function loadData(role, petugas) {
+    try {
+      const res = await fetch(proxy + scriptURL);
+      const data = await res.json();
 
-    // Bersihkan marker
-    markersLayer.clearLayers();
+      const rows = (role === "petugas") ? data.filter(d => d.petugas === petugas) : data;
+      layerGroup.clearLayers();
+      const counts = {};
 
-    // Hitung statistik
-    const counts = {};
-    let firstLatLng = null;
+      rows.forEach(d => {
+        if (!d.koordinat) return;
+        const [lat, lng] = d.koordinat.split(",").map(Number);
+        const color = {
+          "Lampu": "gold",
+          "Jaringan Kabel": "#ff4d4d",
+          "Kontroller/Proteksi": "#00e6ff",
+          "Short Circuit": "orange",
+          "Hilang Tegangan": "plum",
+          "Tidak Diketahui": "#ccc"
+        }[d.jenis] || "gray";
 
-    rows.forEach(d => {
-      if (!d.koordinat || !d.koordinat.includes(",")) return;
-      const [lat, lng] = d.koordinat.split(",").map(v => parseFloat(v.trim()));
-      if (isNaN(lat) || isNaN(lng)) return;
+        const icon = L.divIcon({
+          className: "custom-marker",
+          html: `<div style="width:12px;height:12px;background:${color};border-radius:50%;box-shadow:0 0 8px ${color};"></div>`
+        });
+        L.marker([lat, lng], { icon }).addTo(layerGroup).bindPopup(`
+          <b>${d.lokasi}</b><br>
+          🧍 ${d.petugas}<br>
+          ⚙️ ${d.jenis}<br>
+          📝 ${d.keterangan}<br>
+          ${d.foto ? `<a href="${d.foto}" target="_blank">📸 Foto</a>` : ""}
+        `);
 
-      counts[d.jenis] = (counts[d.jenis] || 0) + 1;
-
-      const icon = L.icon({
-        iconUrl: ICONS[d.jenis] || ICONS["Tidak Diketahui"],
-        iconSize: [28, 28],
-        iconAnchor: [14, 28],
-        popupAnchor: [0, -26]
+        counts[d.jenis] = (counts[d.jenis] || 0) + 1;
       });
 
-      const m = L.marker([lat, lng], { icon }).bindPopup(`
-        <b>${d.lokasi || "-"}</b><br>
-        🧍 ${d.petugas || "-"}<br>
-        📅 ${d.tanggal || "-"}<br>
-        ⚙️ ${d.jenis || "-"}<br>
-        📝 ${d.keterangan || "-"}<br>
-        ${d.foto ? `<a href="${d.foto}" target="_blank">📸 Lihat Foto</a>` : ""}
-      `);
-      m.addTo(markersLayer);
-
-      if (!firstLatLng) firstLatLng = [lat, lng];
-    });
-
-    if (centerToFirst && firstLatLng) mapData.setView(firstLatLng, 15);
-
-    // Render chart
-    const labels = Object.keys(counts);
-    const values = Object.values(counts);
-    const ctx = document.getElementById("chartJenis").getContext("2d");
-    if (chartRef) chartRef.destroy();
-    chartRef = new Chart(ctx, {
-      type: "bar",
-      data: {
-        labels,
-        datasets: [{
-          label: "Jumlah Laporan",
-          data: values,
-          backgroundColor: "rgba(0,255,255,.6)",
-          borderColor: "#00ffff",
-          borderWidth: 1
-        }]
-      },
-      options: { plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true}} }
-    });
-  } catch (err) {
-    console.error("Load data error:", err);
+      // Chart
+      const ctx = document.getElementById("chartJenis").getContext("2d");
+      if (chartRef) chartRef.destroy();
+      chartRef = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: Object.keys(counts),
+          datasets: [{ label: "Jumlah", data: Object.values(counts), backgroundColor: "#00ffffaa" }]
+        },
+        options: { plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true}} }
+      });
+    } catch (err) { console.error(err); }
   }
-}
 
-loadData(true);
+  loadData(roleLogin, namaLogin);
+}
 </script>
 </body>
 </html>
-
