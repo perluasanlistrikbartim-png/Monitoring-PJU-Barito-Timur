@@ -30,6 +30,13 @@ button:hover{background:linear-gradient(90deg,#0077ff,#00ffff); box-shadow:0 0 2
 </style>
 </head>
 <body>
+  <div id="debug" style="position:fixed;bottom:5px;left:5px;color:#0ff;font-size:10px;"></div>
+<script>
+const log = m => document.getElementById("debug").innerText += m + "\n";
+window.onerror = (msg,src,lin,col,err)=>log("❌ "+msg+" ("+lin+")");
+log("⚡ Debug aktif...");
+</script>
+
   <div class="box">
     <h2>⚡ LOGIN TINJU PJU</h2>
     <input id="username" placeholder="👤 Username" autocomplete="username">
@@ -43,4 +50,5 @@ button:hover{background:linear-gradient(90deg,#0077ff,#00ffff); box-shadow:0 0 2
 
 </body>
 </html>
+
 
