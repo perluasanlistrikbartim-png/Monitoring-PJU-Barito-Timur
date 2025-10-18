@@ -105,17 +105,40 @@ button.primary:hover{box-shadow:0 0 22px #00ffff}
 </div>
 
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
 <script>
+
 const proxy = "https://broad-queen-be12.perluasanlistrik-bartim.workers.dev/?url=";
 const scriptURL = "https://script.google.com/macros/s/AKfycbwcMi_pBDlXeEzS5wxpIuiRmDjvkiwjgR53TmcfhGyi0DcKTSj3sgGXxfmPEpbVhUgg4g/exec";
 
-// Proteksi login + tampilkan identitas
-const namaLogin = localStorage.getItem("petugas");
-const roleLogin = localStorage.getItem("role");
-if (!namaLogin || !roleLogin) { location.href = "login.html"; }
-document.getElementById("namaUser").textContent = namaLogin;
-document.getElementById("roleUser").textContent = roleLogin;
-document.getElementById("logoutBtn").onclick = () => { localStorage.clear(); location.href = "login.html"; };
+window.onload = () => {
+  const namaLogin = localStorage.getItem("petugas");
+  const roleLogin = localStorage.getItem("role");
+
+  if (!namaLogin || !roleLogin) {
+    // kosong → arahkan ke login
+    localStorage.clear();
+    window.location.href = "login.html";
+    return;
+  }
+
+  // tampilkan identitas
+  document.getElementById("namaUser").textContent = namaLogin;
+  document.getElementById("roleUser").textContent = roleLogin;
+
+  // tombol logout
+  document.getElementById("logoutBtn").onclick = () => {
+    localStorage.clear();
+    window.location.href = "login.html";
+  };
+
+  // isi field form
+  document.getElementById("tanggal").value = new Date().toISOString().slice(0,10);
+  document.getElementById("petugas").value = namaLogin;
+
+  // lanjutkan loadData() setelah login valid
+  loadData(true);
+};
 
 // Prefill tanggal & petugas
 document.getElementById("tanggal").value = new Date().toISOString().slice(0,10);
@@ -285,3 +308,4 @@ loadData(true);
 </script>
 </body>
 </html>
+
