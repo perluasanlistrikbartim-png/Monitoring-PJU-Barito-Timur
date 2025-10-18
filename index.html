@@ -169,6 +169,26 @@ button:hover {
 
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script>
+  // --- Validasi login ---
+const namaUser = localStorage.getItem("petugas");
+const roleUser = localStorage.getItem("role");
+
+if (!namaUser || !roleUser) {
+  alert("⚠️ Anda harus login terlebih dahulu!");
+  window.location.href = "login.html";
+}
+
+// --- Tampilkan nama login ---
+document.getElementById("namaUser").textContent = namaUser;
+
+// --- Tombol logout elektrik ---
+const logoutBtn = document.getElementById("logoutBtn");
+logoutBtn.addEventListener("click", () => {
+  localStorage.clear();
+  alert("Anda telah logout. ⚡");
+  window.location.href = "login.html";
+});
+
 const proxy = "https://broad-queen-be12.perluasanlistrik-bartim.workers.dev/?url=";
 const scriptURL = "https://script.google.com/macros/s/AKfycbwcMi_pBDlXeEzS5wxpIuiRmDjvkiwjgR53TmcfhGyi0DcKTSj3sgGXxfmPEpbVhUgg4g/exec";
 const namaUser = localStorage.getItem("petugas") || "";
@@ -327,3 +347,4 @@ window.onload = () => {
 </script>
 </body>
 </html>
+
