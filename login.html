@@ -8,47 +8,74 @@
 body {
   font-family: 'Segoe UI', sans-serif;
   background: radial-gradient(circle at center, #000010, #000);
-  min-height: 100vh; display:flex; align-items:center; justify-content:center; color:#0ff;
-  margin:0; overflow:hidden;
+  height:100vh; display:flex; align-items:center; justify-content:center;
+  color:#0ff; margin:0; overflow:hidden;
 }
 .box {
-  width: 340px; padding: 24px; background: rgba(0,10,20,.9); border-radius: 16px;
-  border: 2px solid #00ffff66; box-shadow: 0 0 20px #00ffff55; position:relative;
+  width:340px; padding:24px;
+  background:rgba(0,10,20,.9);
+  border-radius:16px; border:2px solid #00ffff66;
+  box-shadow:0 0 25px #00ffff55;
+  position:relative;
 }
-.box::before{
-  content:""; position:absolute; inset:-4px; border-radius:18px; border:2px solid #00ffff; filter:blur(10px);
-  opacity:.6; animation:flicker 3s linear infinite;
+.box::before {
+  content:""; position:absolute; inset:-4px;
+  border-radius:18px; border:2px solid #00ffff;
+  filter:blur(8px); opacity:.7;
+  animation:flicker 2.8s linear infinite;
 }
 @keyframes flicker { 0%,100%{opacity:.4} 50%{opacity:1} }
-h2{margin:0 0 12px; text-align:center; text-shadow:0 0 12px #00ffff;}
-input{width:100%; padding:10px; margin:8px 0; border-radius:8px; border:1px solid #00ffff66; background:#001122; color:#0ff}
-button{width:100%; padding:10px; border:none; border-radius:8px; font-weight:700; cursor:pointer;
-  background:linear-gradient(90deg,#00ffff,#0077ff); color:#000; box-shadow:0 0 15px #00ffff}
-button:hover{background:linear-gradient(90deg,#0077ff,#00ffff); box-shadow:0 0 25px #00ffff}
-#msg{text-align:center; margin-top:10px; font-weight:700; color:#ffb86b}
-.small{opacity:.7; font-size:12px; text-align:center; margin-top:8px}
+h2 { text-align:center; text-shadow:0 0 15px #00ffff; margin:0 0 14px; }
+input {
+  width:100%; padding:10px; margin:8px 0;
+  border-radius:8px; border:1px solid #00ffff44;
+  background:#001122; color:#0ff;
+}
+button {
+  width:100%; padding:10px; border:none; border-radius:8px;
+  font-weight:bold; background:linear-gradient(90deg,#00ffff,#0077ff);
+  color:#000; cursor:pointer; box-shadow:0 0 15px #00ffff66;
+}
+button:hover { box-shadow:0 0 25px #00ffff; }
+#msg { text-align:center; margin-top:10px; color:#ffb86b; font-weight:bold; }
+.small { font-size:12px; opacity:.7; text-align:center; margin-top:8px; }
 </style>
 </head>
 <body>
-  <div id="debug" style="position:fixed;bottom:5px;left:5px;color:#0ff;font-size:10px;"></div>
+<div class="box">
+  <h2>⚡ LOGIN TINJU PJU</h2>
+  <input id="username" placeholder="👤 Username">
+  <input id="password" type="password" placeholder="🔒 Password">
+  <button id="loginBtn">Masuk</button>
+  <div id="msg"></div>
+  <div class="small">Kab. Barito Timur • Monitoring PJU</div>
+</div>
+
 <script>
-const log = m => document.getElementById("debug").innerText += m + "\n";
-window.onerror = (msg,src,lin,col,err)=>log("❌ "+msg+" ("+lin+")");
-log("⚡ Debug aktif...");
+// 🧠 Daftar user statis (tanpa Sheet)
+const USERS = [
+  { username: "admin", password: "gacor123", nama: "Administrator", role: "admin" },
+  { username: "terry", password: "gacor123", nama: "Terry N.", role: "admin" },
+  { username: "deni", password: "gacor123", nama: "Deni W.", role: "admin" },
+  { username: "ferry", password: "123456", nama: "Ferry Andinata", role: "petugas" },
+  { username: "maman", password: "123456", nama: "Muharman", role: "petugas" }
+];
+
+document.getElementById("loginBtn").addEventListener("click", () => {
+  const u = username.value.trim();
+  const p = password.value.trim();
+  const msg = document.getElementById("msg");
+  if (!u || !p) return msg.textContent = "⚠️ Lengkapi username & password";
+
+  const user = USERS.find(x => x.username === u && x.password === p);
+  if (!user) return msg.textContent = "❌ Username atau password salah";
+
+  localStorage.setItem("petugas", user.nama);
+  localStorage.setItem("role", user.role);
+  msg.style.color = "#8aff8a";
+  msg.textContent = "✅ Login berhasil...";
+  setTimeout(() => window.location.href = "index.html", 800);
+});
 </script>
-
-  <div class="box">
-    <h2>⚡ LOGIN TINJU PJU</h2>
-    <input id="username" placeholder="👤 Username" autocomplete="username">
-    <input id="password" type="password" placeholder="🔒 Password" autocomplete="current-password">
-    <button id="loginBtn">Masuk</button>
-    <div id="msg"></div>
-    <div class="small">Kab. Barito Timur • PJU Monitoring</div>
-  </div>
-
-<script src="login.js"></script>
-
 </body>
 </html>
-
-
