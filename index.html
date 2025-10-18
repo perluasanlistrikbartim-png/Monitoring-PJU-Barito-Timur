@@ -67,7 +67,10 @@ button:hover {
 </head>
 <body>
 <h2>⚡ Sistem TINJU PJU – Barito Timur</h2>
-
+<div style="text-align:center; margin-top:10px;">
+  <span id="userInfo" style="color:#0ff; font-weight:bold;"></span>
+  <button id="logoutBtn" style="margin-left:10px; background:#ff0066; color:#fff; border:none; border-radius:6px; padding:5px 10px; cursor:pointer;">🚪 Logout</button>
+</div>
 <form id="tinjuForm">
   <label>Tanggal:</label>
   <input type="date" id="tanggal" required>
@@ -113,9 +116,30 @@ const proxyURL = "https://broad-queen-be12.perluasanlistrik-bartim.workers.dev/?
 const scriptURL = "https://script.google.com/macros/s/AKfycbwcMi_pBDlXeEzS5wxpIuiRmDjvkiwjgR53TmcfhGyi0DcKTSj3sgGXxfmPEpbVhUgg4g/exec";
 
 document.addEventListener("DOMContentLoaded", () => {
-  const user = localStorage.getItem("petugas") || "";
-  const role = localStorage.getItem("role") || "";
-  if (!user) window.location.href = "login.html";
+  const user = localStorage.getItem("petugas");
+  const role = localStorage.getItem("role");
+
+  // 🔒 Proteksi akses langsung
+  if (!user || !role) {
+    alert("⚠️ Anda harus login terlebih dahulu!");
+    window.location.href = "login.html";
+    return;
+  }
+
+  // Tampilkan nama di header
+  document.getElementById("userInfo").innerText = `👤 ${user.toUpperCase()} (${role})`;
+  document.getElementById("petugas").value = user;
+
+  // Tombol logout
+  document.getElementById("logoutBtn").addEventListener("click", () => {
+    if (confirm("Keluar dari sistem TINJU?")) {
+      localStorage.clear();
+      window.location.href = "login.html";
+    }
+  });
+
+  document.getElementById("tanggal").valueAsDate = new Date();
+
   document.getElementById("petugas").value = user;
   document.getElementById("tanggal").valueAsDate = new Date();
 
@@ -215,3 +239,4 @@ document.addEventListener("DOMContentLoaded", () => {
 </script>
 </body>
 </html>
+
