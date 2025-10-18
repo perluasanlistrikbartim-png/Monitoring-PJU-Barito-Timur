@@ -4,109 +4,154 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>⚡ Login Sistem TINJU</title>
+
 <style>
+/* === Latar Belakang & Efek Kilat === */
 body {
-  margin: 0; padding: 0;
+  margin: 0;
+  padding: 0;
   height: 100vh;
-  background: radial-gradient(circle at center, #02040a 0%, #000 100%);
-  font-family: 'Poppins', sans-serif;
+  background: radial-gradient(circle at center, #01020a 0%, #000 100%);
   overflow: hidden;
-  display: flex; justify-content: center; align-items: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Poppins', sans-serif;
+  color: #00eaff;
 }
 
-/* Efek kilat di langit */
 @keyframes lightning {
-  0%, 97%, 100% { background-color: transparent; }
-  98% { background-color: rgba(255,255,255,0.3); }
-  99% { background-color: rgba(255,255,255,0.7); }
+  0%, 95%, 100% { background-color: transparent; }
+  96%, 98% { background-color: rgba(255, 255, 255, 0.3); }
+  97% { background-color: rgba(255, 255, 255, 0.6); }
 }
-.lightning-effect {
+.lightning {
   position: fixed;
   inset: 0;
-  z-index: 1;
+  animation: lightning 6s infinite;
   pointer-events: none;
-  animation: lightning 8s infinite;
+  z-index: 0;
 }
 
-/* Kotak login */
+/* === Kotak Login === */
 .login-box {
-  background: rgba(0, 20, 40, 0.8);
-  border: 2px solid #00ffff;
+  position: relative;
+  z-index: 1;
+  background: rgba(0, 15, 30, 0.8);
   border-radius: 16px;
   padding: 40px 35px;
-  width: 300px;
+  width: 310px;
   text-align: center;
-  box-shadow: 0 0 30px #00ffff88, inset 0 0 20px #00ffff44;
-  position: relative;
-  z-index: 2;
+  box-shadow: 0 0 30px #00ffff66, inset 0 0 20px #00ffff22;
+  overflow: hidden;
   backdrop-filter: blur(4px);
 }
+
+/* Arus listrik mengalir di pinggiran kotak */
+.login-box::before {
+  content: '';
+  position: absolute;
+  top: -2px; left: -2px; right: -2px; bottom: -2px;
+  background: linear-gradient(120deg, #00ffff, #00eaff, #007bff, #00ffff);
+  background-size: 400% 400%;
+  z-index: -1;
+  border-radius: 18px;
+  animation: electricFlow 6s linear infinite;
+  filter: blur(1.5px);
+}
+
+@keyframes electricFlow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* === Judul Neon === */
 h2 {
   color: #00ffff;
-  text-shadow: 0 0 15px #00ffff;
+  text-shadow:
+    0 0 10px #00ffff,
+    0 0 20px #00ffff,
+    0 0 40px #00eaff;
+  letter-spacing: 1px;
   font-weight: 700;
-  margin-bottom: 20px;
+  margin-bottom: 25px;
+  transition: 0.3s;
 }
+h2:hover {
+  text-shadow:
+    0 0 15px #00ffff,
+    0 0 35px #00ffff,
+    0 0 60px #00ffff;
+}
+
+/* === Input Neon === */
 input {
   width: 100%;
   margin: 8px 0;
-  padding: 10px;
-  border-radius: 8px;
-  border: 1px solid #0ff;
-  background: rgba(0,0,0,0.5);
-  color: #fff;
-  font-size: 14px;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #00ffff99;
+  background: rgba(0, 0, 0, 0.5);
+  color: #00ffff;
+  font-size: 15px;
   outline: none;
-  box-shadow: 0 0 6px #00ffff33;
+  box-shadow: 0 0 8px #00ffff33;
+  transition: all 0.3s ease;
 }
 input:focus {
-  box-shadow: 0 0 10px #00ffff;
+  box-shadow: 0 0 12px #00ffff;
+  border-color: #00ffff;
 }
+
+/* === Tombol Login === */
 button {
   width: 100%;
   margin-top: 15px;
-  padding: 10px;
+  padding: 12px;
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
   background: linear-gradient(90deg, #00ffff, #007bff);
   color: #000;
-  font-weight: 700;
+  font-weight: bold;
+  letter-spacing: 0.5px;
   cursor: pointer;
-  text-transform: uppercase;
-  box-shadow: 0 0 15px #00ffffaa;
   transition: all 0.3s ease;
+  box-shadow: 0 0 20px #00ffff66;
 }
 button:hover {
   background: linear-gradient(90deg, #007bff, #00ffff);
-  box-shadow: 0 0 25px #00ffff;
+  box-shadow: 0 0 35px #00ffff;
+  transform: scale(1.05);
 }
+
+/* === Pesan & Footer === */
 #msg {
   color: #ffcc00;
   font-size: 13px;
-  margin-top: 10px;
+  margin-top: 12px;
+  text-shadow: 0 0 5px #ffaa00;
 }
 footer {
   color: #00ffff77;
   font-size: 11px;
-  position: absolute;
-  bottom: 10px;
   text-align: center;
-  width: 100%;
+  margin-top: 15px;
 }
 </style>
 </head>
+
 <body>
-<div class="lightning-effect"></div>
+<div class="lightning"></div>
 
 <div class="login-box">
-  <h2>⚡ Login Sistem TINJU</h2>
+  <h2>⚡ LOGIN TINJU</h2>
   <input type="text" id="username" placeholder="Username" required>
   <input type="password" id="password" placeholder="Password" required>
   <button id="loginBtn">Masuk</button>
   <div id="msg"></div>
+  <footer>⚡ Sistem Monitoring PJU Barito Timur</footer>
 </div>
-
-<footer>⚡ TINJU – Monitoring PJU Barito Timur</footer>
 
 <script>
 const proxyURL = "https://broad-queen-be12.perluasanlistrik-bartim.workers.dev/?url=";
