@@ -4,142 +4,70 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>⚡ Login – TINJU PJU</title>
-<link rel="stylesheet" href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css">
 <style>
 body {
   font-family: 'Segoe UI', sans-serif;
   background: radial-gradient(circle at center, #000010, #000);
-  height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  overflow: hidden;
-  color: #0ff;
+  min-height: 100vh; display:flex; align-items:center; justify-content:center; color:#0ff;
+  margin:0; overflow:hidden;
 }
-
-.login-box {
-  width: 340px;
-  padding: 25px;
-  background: rgba(0, 10, 20, 0.9);
-  border-radius: 15px;
-  border: 2px solid #00ffff88;
-  box-shadow: 0 0 20px #00ffff55;
-  position: relative;
-  animation: flicker 4s infinite;
+.box {
+  width: 340px; padding: 24px; background: rgba(0,10,20,.9); border-radius: 16px;
+  border: 2px solid #00ffff66; box-shadow: 0 0 20px #00ffff55; position:relative;
 }
-
-@keyframes flicker {
-  0%, 100% { box-shadow: 0 0 15px #00ffff; }
-  50% { box-shadow: 0 0 30px #00ffff; }
+.box::before{
+  content:""; position:absolute; inset:-4px; border-radius:18px; border:2px solid #00ffff; filter:blur(10px);
+  opacity:.6; animation:flicker 3s linear infinite;
 }
-
-.login-box::before {
-  content: "";
-  position: absolute;
-  top: -3px; left: -3px; right: -3px; bottom: -3px;
-  border-radius: 15px;
-  border: 2px solid #00ffff;
-  filter: blur(10px);
-  opacity: 0.5;
-  animation: lightning 3s infinite linear;
-}
-@keyframes lightning {
-  0%, 100% { opacity: 0.5; }
-  50% { opacity: 1; }
-}
-
-h2 {
-  text-align: center;
-  color: #00ffff;
-  margin-bottom: 15px;
-  text-shadow: 0 0 10px #00ffff;
-}
-
-input {
-  width: 100%;
-  padding: 10px;
-  margin: 8px 0;
-  border-radius: 8px;
-  border: 1px solid #00ffff66;
-  background: #001122;
-  color: #0ff;
-  font-size: 15px;
-}
-
-button {
-  width: 100%;
-  padding: 10px;
-  background: linear-gradient(90deg, #00ffff, #0077ff);
-  border: none;
-  border-radius: 8px;
-  color: #000;
-  font-weight: bold;
-  cursor: pointer;
-  box-shadow: 0 0 15px #00ffff;
-}
-button:hover {
-  background: linear-gradient(90deg, #0077ff, #00ffff);
-  box-shadow: 0 0 25px #00ffff;
-}
-
-#msg {
-  text-align: center;
-  margin-top: 10px;
-  font-weight: bold;
-  color: #ff6600;
-}
+@keyframes flicker { 0%,100%{opacity:.4} 50%{opacity:1} }
+h2{margin:0 0 12px; text-align:center; text-shadow:0 0 12px #00ffff;}
+input{width:100%; padding:10px; margin:8px 0; border-radius:8px; border:1px solid #00ffff66; background:#001122; color:#0ff}
+button{width:100%; padding:10px; border:none; border-radius:8px; font-weight:700; cursor:pointer;
+  background:linear-gradient(90deg,#00ffff,#0077ff); color:#000; box-shadow:0 0 15px #00ffff}
+button:hover{background:linear-gradient(90deg,#0077ff,#00ffff); box-shadow:0 0 25px #00ffff}
+#msg{text-align:center; margin-top:10px; font-weight:700; color:#ffb86b}
+.small{opacity:.7; font-size:12px; text-align:center; margin-top:8px}
 </style>
 </head>
-
 <body>
-<div class="login-box">
-  <h2>⚡ LOGIN TINJU PJU ⚡</h2>
-  <input type="text" id="username" placeholder="👤 Username" required>
-  <input type="password" id="password" placeholder="🔒 Password" required>
-  <button id="loginBtn">Login</button>
-  <p id="msg"></p>
-</div>
+  <div class="box">
+    <h2>⚡ LOGIN TINJU PJU</h2>
+    <input id="username" placeholder="👤 Username" autocomplete="username">
+    <input id="password" type="password" placeholder="🔒 Password" autocomplete="current-password">
+    <button id="loginBtn">Masuk</button>
+    <div id="msg"></div>
+    <div class="small">Kab. Barito Timur • PJU Monitoring</div>
+  </div>
 
 <script>
 const proxy = "https://broad-queen-be12.perluasanlistrik-bartim.workers.dev/?url=";
 const scriptURL = "https://script.google.com/macros/s/AKfycbwcMi_pBDlXeEzS5wxpIuiRmDjvkiwjgR53TmcfhGyi0DcKTSj3sgGXxfmPEpbVhUgg4g/exec";
 
 document.getElementById("loginBtn").addEventListener("click", async () => {
-  const username = document.getElementById("username").value.trim();
-  const password = document.getElementById("password").value.trim();
+  const u = document.getElementById("username").value.trim();
+  const p = document.getElementById("password").value.trim();
   const msg = document.getElementById("msg");
+  if (!u || !p) { msg.textContent = "⚠️ Lengkapi username & password"; return; }
 
-  if (!username || !password) {
-    msg.textContent = "⚠️ Lengkapi username dan password!";
-    return;
-  }
-
-  msg.textContent = "⚡ Memeriksa login...";
-
+  msg.textContent = "⚡ Memeriksa ...";
   try {
     const res = await fetch(proxy + scriptURL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        action: "login",
-        username: username,
-        password: password
-      })
+      body: JSON.stringify({ action: "login", username: u, password: p })
     });
-    const data = await res.json();
-
-    if (data.status === "success") {
-      // Simpan ke localStorage
-      localStorage.setItem("petugas", data.nama);
-      localStorage.setItem("role", data.role);
-      msg.style.color = "#0f0";
-      msg.textContent = "✅ Login berhasil!";
-      setTimeout(() => (window.location.href = "index.html"), 1200);
+    const r = await res.json();
+    if (r.status === "success") {
+      localStorage.setItem("petugas", r.nama);
+      localStorage.setItem("role", r.role);
+      msg.style.color = "#8aff8a";
+      msg.textContent = "✅ Berhasil, membuka dashboard ...";
+      setTimeout(() => location.href = "index.html", 700);
     } else {
-      msg.textContent = "❌ " + data.message;
+      msg.textContent = "❌ " + (r.message || "Login gagal");
     }
   } catch (err) {
-    msg.textContent = "⚠️ Gagal koneksi server!";
+    msg.textContent = "❌ Koneksi gagal";
   }
 });
 </script>
