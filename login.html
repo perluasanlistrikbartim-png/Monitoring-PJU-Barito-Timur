@@ -3,186 +3,143 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>⚡ Login Sistem TINJU</title>
-
+<title>⚡ Login – TINJU PJU</title>
+<link rel="stylesheet" href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css">
 <style>
-/* === Latar Belakang & Efek Kilat === */
 body {
-  margin: 0;
-  padding: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background: radial-gradient(circle at center, #000010, #000);
   height: 100vh;
-  background: radial-gradient(circle at center, #01020a 0%, #000 100%);
-  overflow: hidden;
   display: flex;
   justify-content: center;
   align-items: center;
-  font-family: 'Poppins', sans-serif;
-  color: #00eaff;
-}
-
-@keyframes lightning {
-  0%, 95%, 100% { background-color: transparent; }
-  96%, 98% { background-color: rgba(255, 255, 255, 0.3); }
-  97% { background-color: rgba(255, 255, 255, 0.6); }
-}
-.lightning {
-  position: fixed;
-  inset: 0;
-  animation: lightning 6s infinite;
-  pointer-events: none;
-  z-index: 0;
-}
-
-/* === Kotak Login === */
-.login-box {
-  position: relative;
-  z-index: 1;
-  background: rgba(0, 15, 30, 0.8);
-  border-radius: 16px;
-  padding: 40px 35px;
-  width: 310px;
-  text-align: center;
-  box-shadow: 0 0 30px #00ffff66, inset 0 0 20px #00ffff22;
   overflow: hidden;
-  backdrop-filter: blur(4px);
+  color: #0ff;
 }
 
-/* Arus listrik mengalir di pinggiran kotak */
+.login-box {
+  width: 340px;
+  padding: 25px;
+  background: rgba(0, 10, 20, 0.9);
+  border-radius: 15px;
+  border: 2px solid #00ffff88;
+  box-shadow: 0 0 20px #00ffff55;
+  position: relative;
+  animation: flicker 4s infinite;
+}
+
+@keyframes flicker {
+  0%, 100% { box-shadow: 0 0 15px #00ffff; }
+  50% { box-shadow: 0 0 30px #00ffff; }
+}
+
 .login-box::before {
-  content: '';
+  content: "";
   position: absolute;
-  top: -2px; left: -2px; right: -2px; bottom: -2px;
-  background: linear-gradient(120deg, #00ffff, #00eaff, #007bff, #00ffff);
-  background-size: 400% 400%;
-  z-index: -1;
-  border-radius: 18px;
-  animation: electricFlow 6s linear infinite;
-  filter: blur(1.5px);
+  top: -3px; left: -3px; right: -3px; bottom: -3px;
+  border-radius: 15px;
+  border: 2px solid #00ffff;
+  filter: blur(10px);
+  opacity: 0.5;
+  animation: lightning 3s infinite linear;
+}
+@keyframes lightning {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
 }
 
-@keyframes electricFlow {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
-/* === Judul Neon === */
 h2 {
+  text-align: center;
   color: #00ffff;
-  text-shadow:
-    0 0 10px #00ffff,
-    0 0 20px #00ffff,
-    0 0 40px #00eaff;
-  letter-spacing: 1px;
-  font-weight: 700;
-  margin-bottom: 25px;
-  transition: 0.3s;
-}
-h2:hover {
-  text-shadow:
-    0 0 15px #00ffff,
-    0 0 35px #00ffff,
-    0 0 60px #00ffff;
+  margin-bottom: 15px;
+  text-shadow: 0 0 10px #00ffff;
 }
 
-/* === Input Neon === */
 input {
   width: 100%;
+  padding: 10px;
   margin: 8px 0;
-  padding: 12px;
-  border-radius: 10px;
-  border: 1px solid #00ffff99;
-  background: rgba(0, 0, 0, 0.5);
-  color: #00ffff;
+  border-radius: 8px;
+  border: 1px solid #00ffff66;
+  background: #001122;
+  color: #0ff;
   font-size: 15px;
-  outline: none;
-  box-shadow: 0 0 8px #00ffff33;
-  transition: all 0.3s ease;
-}
-input:focus {
-  box-shadow: 0 0 12px #00ffff;
-  border-color: #00ffff;
 }
 
-/* === Tombol Login === */
 button {
   width: 100%;
-  margin-top: 15px;
-  padding: 12px;
+  padding: 10px;
+  background: linear-gradient(90deg, #00ffff, #0077ff);
   border: none;
-  border-radius: 10px;
-  background: linear-gradient(90deg, #00ffff, #007bff);
+  border-radius: 8px;
   color: #000;
   font-weight: bold;
-  letter-spacing: 0.5px;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 0 20px #00ffff66;
+  box-shadow: 0 0 15px #00ffff;
 }
 button:hover {
-  background: linear-gradient(90deg, #007bff, #00ffff);
-  box-shadow: 0 0 35px #00ffff;
-  transform: scale(1.05);
+  background: linear-gradient(90deg, #0077ff, #00ffff);
+  box-shadow: 0 0 25px #00ffff;
 }
 
-/* === Pesan & Footer === */
 #msg {
-  color: #ffcc00;
-  font-size: 13px;
-  margin-top: 12px;
-  text-shadow: 0 0 5px #ffaa00;
-}
-footer {
-  color: #00ffff77;
-  font-size: 11px;
   text-align: center;
-  margin-top: 15px;
+  margin-top: 10px;
+  font-weight: bold;
+  color: #ff6600;
 }
 </style>
 </head>
 
 <body>
-<div class="lightning"></div>
-
 <div class="login-box">
-  <h2>⚡ LOGIN TINJU</h2>
-  <input type="text" id="username" placeholder="Username" required>
-  <input type="password" id="password" placeholder="Password" required>
-  <button id="loginBtn">Masuk</button>
-  <div id="msg"></div>
-  <footer>⚡ Sistem Monitoring PJU Barito Timur</footer>
+  <h2>⚡ LOGIN TINJU PJU ⚡</h2>
+  <input type="text" id="username" placeholder="👤 Username" required>
+  <input type="password" id="password" placeholder="🔒 Password" required>
+  <button id="loginBtn">Login</button>
+  <p id="msg"></p>
 </div>
 
 <script>
-const proxyURL = "https://broad-queen-be12.perluasanlistrik-bartim.workers.dev/?url=";
+const proxy = "https://broad-queen-be12.perluasanlistrik-bartim.workers.dev/?url=";
 const scriptURL = "https://script.google.com/macros/s/AKfycbwcMi_pBDlXeEzS5wxpIuiRmDjvkiwjgR53TmcfhGyi0DcKTSj3sgGXxfmPEpbVhUgg4g/exec";
 
 document.getElementById("loginBtn").addEventListener("click", async () => {
   const username = document.getElementById("username").value.trim();
   const password = document.getElementById("password").value.trim();
   const msg = document.getElementById("msg");
+
   if (!username || !password) {
-    msg.textContent = "⚠️ Lengkapi username & password!";
+    msg.textContent = "⚠️ Lengkapi username dan password!";
     return;
   }
-  msg.textContent = "⚡ Memeriksa akun...";
+
+  msg.textContent = "⚡ Memeriksa login...";
+
   try {
-    const res = await fetch(proxyURL + scriptURL, {
+    const res = await fetch(proxy + scriptURL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "login", username, password })
+      body: JSON.stringify({
+        action: "login",
+        username: username,
+        password: password
+      })
     });
-    const r = await res.json();
-    if (r.status === "success") {
-      localStorage.setItem("petugas", r.nama);
-      localStorage.setItem("role", r.role);
-      window.location.href = "index.html";
+    const data = await res.json();
+
+    if (data.status === "success") {
+      // Simpan ke localStorage
+      localStorage.setItem("petugas", data.nama);
+      localStorage.setItem("role", data.role);
+      msg.style.color = "#0f0";
+      msg.textContent = "✅ Login berhasil!";
+      setTimeout(() => (window.location.href = "index.html"), 1200);
     } else {
-      msg.textContent = "❌ " + r.message;
+      msg.textContent = "❌ " + data.message;
     }
   } catch (err) {
-    msg.textContent = "⚠️ Gagal terhubung ke server.";
-    console.error(err);
+    msg.textContent = "⚠️ Gagal koneksi server!";
   }
 });
 </script>
