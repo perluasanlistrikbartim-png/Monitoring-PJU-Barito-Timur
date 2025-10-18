@@ -3,100 +3,70 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TINJU ⚡ Monitoring PJU Barito Timur</title>
+<title>TINJU – Monitoring PJU Barito Timur</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
 <style>
 body {
-  font-family: 'Segoe UI', sans-serif;
-  margin: 0;
-  background: radial-gradient(circle at top, #0a0a0a 0%, #020202 100%);
-  color: #fff;
-  overflow-x: hidden;
+  background: radial-gradient(circle at center, #000814, #000);
+  font-family: 'Poppins', sans-serif;
+  margin: 0; color: #fff;
 }
 h2 {
+  background: linear-gradient(90deg, #00ffff44, #007bff33);
+  color: #00ffff;
   text-align: center;
-  color: #00eaff;
-  text-shadow: 0 0 10px #00ffff, 0 0 30px #0077ff;
-  background: linear-gradient(90deg, #001a33, #003366);
-  padding: 12px;
-  margin: 0;
+  padding: 10px;
+  text-shadow: 0 0 10px #00ffff;
 }
 form {
-  background: rgba(10,10,10,0.9);
-  border: 1px solid #00eaff88;
-  box-shadow: 0 0 15px #00eaff55;
-  border-radius: 10px;
+  background: rgba(0,0,0,0.6);
+  border: 1px solid #00ffff55;
+  box-shadow: 0 0 20px #00ffff33;
+  margin: 20px auto;
   max-width: 500px;
-  margin: 25px auto;
   padding: 20px;
-  color: #eee;
+  border-radius: 10px;
 }
-label { display: block; margin-top: 10px; font-weight: bold; color: #00eaff; }
+label { display:block; margin-top:10px; font-weight:bold; color:#0ff; }
 input, select, textarea {
-  width: 100%; padding: 8px;
-  border: 1px solid #0077ff88; border-radius: 6px;
-  background: #000; color: #00eaff;
-  font-size: 14px;
-  outline: none;
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #00ffff33;
+  border-radius: 6px;
+  background: rgba(0,0,0,0.5);
+  color: #fff;
 }
 button {
   width: 100%;
-  margin-top: 12px;
+  margin-top: 15px;
   padding: 10px;
-  background: linear-gradient(90deg, #0077ff, #00eaff);
   border: none;
   border-radius: 6px;
-  color: white;
+  background: linear-gradient(90deg, #00ffff, #007bff);
+  color: #000;
   font-weight: bold;
   cursor: pointer;
-  box-shadow: 0 0 15px #00eaff77;
-  transition: 0.3s;
 }
 button:hover {
-  transform: scale(1.03);
-  box-shadow: 0 0 25px #00ffff;
+  box-shadow: 0 0 20px #00ffff;
 }
 #map, #mapData {
   height: 320px;
-  border-radius: 8px;
+  border-radius: 10px;
   margin-top: 10px;
-  box-shadow: 0 0 15px #0077ff55;
 }
-#msg {
-  text-align: center;
-  margin-top: 10px;
-  font-weight: bold;
-  color: #00eaff;
-  text-shadow: 0 0 10px #00ffff;
-}
+#msg { text-align:center; margin-top:10px; font-weight:bold; color:#ff0; }
 .preview {
-  display: block;
   width: 100%;
   max-height: 200px;
-  border-radius: 8px;
+  border-radius: 10px;
   margin-top: 5px;
-  object-fit: cover;
-  border: 1px solid #0077ff88;
-}
-.logout {
-  text-align: right;
-  margin: 10px;
-}
-.logout button {
-  width: auto;
-  padding: 6px 12px;
-  background: #222;
-  border: 1px solid #00eaff77;
-  font-size: 13px;
+  display:none;
 }
 </style>
 </head>
-
 <body>
-<h2>⚡ Monitoring PJU (TINJU) – Kabupaten Barito Timur</h2>
-<div class="logout">
-  <button id="logoutBtn">🔒 Logout</button>
-</div>
+<h2>⚡ Sistem TINJU PJU – Barito Timur</h2>
 
 <form id="tinjuForm">
   <label>Tanggal:</label>
@@ -105,188 +75,143 @@ button:hover {
   <label>Petugas:</label>
   <input type="text" id="petugas" required readonly>
 
-  <label>Nama Lokasi / Panel:</label>
+  <label>Lokasi / Panel:</label>
   <input type="text" id="lokasi" required placeholder="Contoh: Panel PJU Pasar Tamiang Layang">
 
   <label>Koordinat:</label>
   <input type="text" id="koordinat" readonly required>
   <div id="map"></div>
-  <button type="button" id="lokasiSaya">📍 Ambil Lokasi Saya</button>
+  <button type="button" id="lokasiSaya">📍 Ambil Lokasi</button>
 
   <label>Jenis Kerusakan:</label>
   <select id="jenis" required>
-    <option value="">Pilih Jenis Kerusakan</option>
+    <option value="">Pilih Jenis</option>
     <option value="Lampu">Lampu</option>
     <option value="Jaringan Kabel">Jaringan Kabel</option>
     <option value="Kontroller/Proteksi">Kontroller/Proteksi</option>
     <option value="Short Circuit">Short Circuit</option>
     <option value="Hilang Tegangan">Hilang Tegangan</option>
-    <option value="Tidak Diketahui">Tidak Diketahui</option>
   </select>
 
   <label>Keterangan:</label>
   <textarea id="keterangan" rows="3"></textarea>
 
   <label>📸 Upload Foto Lokasi:</label>
-  <input type="file" id="foto" accept="image/*" capture="environment">
-  <img id="preview" class="preview" style="display:none">
+  <input type="file" id="foto" accept="image/*">
+  <img id="preview" class="preview">
 
   <button type="submit">✅ Kirim Data</button>
 </form>
 
 <div id="msg"></div>
-
-<h2>🗺️ Data PJU yang sudah masuk</h2>
+<h2>🗺️ Peta Data PJU</h2>
 <div id="mapData"></div>
 
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script>
-const scriptURL =
-  "https://broad-queen-be12.perluasanlistrik-bartim.workers.dev/?url=" +
-  encodeURIComponent("https://script.google.com/macros/s/AKfycbwcMi_pBDlXeEzS5wxpIuiRmDjvkiwjgR53TmcfhGyi0DcKTSj3sgGXxfmPEpbVhUgg4g/exec");
+const proxyURL = "https://broad-queen-be12.perluasanlistrik-bartim.workers.dev/?url=";
+const scriptURL = "https://script.google.com/macros/s/AKfycbwcMi_pBDlXeEzS5wxpIuiRmDjvkiwjgR53TmcfhGyi0DcKTSj3sgGXxfmPEpbVhUgg4g/exec";
 
-// === Cek Login ===
-if (!localStorage.getItem("petugas")) {
-  window.location.href = "login.html";
-}
+document.addEventListener("DOMContentLoaded", () => {
+  const user = localStorage.getItem("petugas") || "";
+  const role = localStorage.getItem("role") || "";
+  if (!user) window.location.href = "login.html";
+  document.getElementById("petugas").value = user;
+  document.getElementById("tanggal").valueAsDate = new Date();
 
-// === Logout ===
-document.getElementById("logoutBtn").onclick = () => {
-  localStorage.clear();
-  window.location.href = "login.html";
-};
+  const map = L.map('map').setView([-2.13, 115.10], 9);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+  let marker;
 
-// === Preview Foto ===
-document.getElementById("foto").addEventListener("change", e => {
-  const file = e.target.files[0];
-  if (file) {
-    const reader = new FileReader();
-    reader.onload = ev => {
-      const img = document.getElementById("preview");
-      img.src = ev.target.result;
-      img.style.display = "block";
-    };
-    reader.readAsDataURL(file);
-  }
-});
-
-// === PETA INPUT ===
-const map = L.map('map').setView([-2.13, 115.10], 9);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
-let marker;
-
-map.on('click', e => {
-  const lat = e.latlng.lat.toFixed(6);
-  const lng = e.latlng.lng.toFixed(6);
-  document.getElementById('koordinat').value = `${lat}, ${lng}`;
-  if (marker) map.removeLayer(marker);
-  marker = L.marker(e.latlng).addTo(map).bindPopup(`📍 ${lat}, ${lng}`).openPopup();
-});
-
-document.getElementById('lokasiSaya').addEventListener('click', () => {
-  if (!navigator.geolocation) return alert("GPS tidak didukung browser ini.");
-  navigator.geolocation.getCurrentPosition(pos => {
-    const lat = pos.coords.latitude.toFixed(6);
-    const lng = pos.coords.longitude.toFixed(6);
+  map.on('click', e => {
+    const lat = e.latlng.lat.toFixed(6);
+    const lng = e.latlng.lng.toFixed(6);
     document.getElementById('koordinat').value = `${lat}, ${lng}`;
-    map.setView([lat, lng], 17);
     if (marker) map.removeLayer(marker);
-    marker = L.marker([lat, lng]).addTo(map)
-      .bindPopup(`📍 Lokasi Anda<br>${lat}, ${lng}`).openPopup();
-  }, () => alert("Gagal mendapatkan lokasi."));
-});
+    marker = L.marker(e.latlng).addTo(map).bindPopup(`📍 ${lat}, ${lng}`).openPopup();
+  });
 
-// === KIRIM DATA ===
-document.getElementById('petugas').value = localStorage.getItem("petugas");
-document.getElementById('tinjuForm').addEventListener('submit', async e => {
-  e.preventDefault();
-  const msg = document.getElementById('msg');
-  msg.innerHTML = "⏳ Mengirim data...";
+  document.getElementById("lokasiSaya").addEventListener("click", () => {
+    navigator.geolocation.getCurrentPosition(pos => {
+      const lat = pos.coords.latitude.toFixed(6);
+      const lng = pos.coords.longitude.toFixed(6);
+      document.getElementById('koordinat').value = `${lat}, ${lng}`;
+      map.setView([lat, lng], 17);
+      if (marker) map.removeLayer(marker);
+      marker = L.marker([lat, lng]).addTo(map)
+        .bindPopup(`📍 Lokasi Anda<br>${lat}, ${lng}`).openPopup();
+    }, () => alert("Gagal ambil lokasi"));
+  });
 
-  const koordinat = document.getElementById('koordinat').value.trim();
-  if (!koordinat) return msg.innerHTML = "⚠️ Ambil koordinat dulu.";
-
-  const file = document.getElementById('foto').files[0];
-  let fotoBase64 = "";
-  if (file) {
-    fotoBase64 = await new Promise((resolve, reject) => {
+  const fotoInput = document.getElementById("foto");
+  const preview = document.getElementById("preview");
+  fotoInput.addEventListener("change", e => {
+    const file = e.target.files[0];
+    if (file) {
       const reader = new FileReader();
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = reject;
+      reader.onload = ev => {
+        preview.src = ev.target.result;
+        preview.style.display = "block";
+      };
       reader.readAsDataURL(file);
-    });
-  }
-
-  const data = {
-    tanggal: document.getElementById('tanggal').value,
-    petugas: localStorage.getItem("petugas"),
-    lokasi: document.getElementById('lokasi').value,
-    koordinat,
-    jenis: document.getElementById('jenis').value,
-    keterangan: document.getElementById('keterangan').value,
-    fotoBase64
-  };
-
-  try {
-    const res = await fetch(scriptURL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data)
-    });
-    const r = await res.json();
-    if (r.status === "success") {
-      msg.innerHTML = "✅ Data & foto berhasil dikirim!";
-      e.target.reset();
-      document.getElementById('preview').style.display = "none";
-      loadData();
-    } else {
-      msg.innerHTML = "⚠️ Gagal: " + r.message;
     }
-  } catch (err) {
-    msg.innerHTML = "❌ Gagal kirim: " + err;
-  }
-});
+  });
 
-// === PETA OUTPUT ===
-const mapData = L.map('mapData').setView([-2.13, 115.10], 9);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(mapData);
+  document.getElementById("tinjuForm").addEventListener("submit", async e => {
+    e.preventDefault();
+    const file = fotoInput.files[0];
+    let fotoBase64 = "";
+    if (file) fotoBase64 = await new Promise(r => {
+      const fr = new FileReader(); fr.onload = () => r(fr.result); fr.readAsDataURL(file);
+    });
 
-function warnaJenis(jenis) {
-  return jenis.includes("Lampu") ? "yellow" :
-         jenis.includes("Jaringan") ? "orange" :
-         jenis.includes("Kontroller") ? "blue" :
-         jenis.includes("Short") ? "red" :
-         jenis.includes("Hilang") ? "purple" : "gray";
-}
+    const data = {
+      action: "upload",
+      tanggal: document.getElementById("tanggal").value,
+      petugas: user,
+      lokasi: document.getElementById("lokasi").value,
+      koordinat: document.getElementById("koordinat").value,
+      jenis: document.getElementById("jenis").value,
+      keterangan: document.getElementById("keterangan").value,
+      fotoBase64
+    };
 
-async function loadData() {
-  try {
-    const res = await fetch(scriptURL);
+    const msg = document.getElementById("msg");
+    msg.innerHTML = "⚡ Mengirim data...";
+    try {
+      const res = await fetch(proxyURL + scriptURL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      });
+      const r = await res.json();
+      if (r.status === "success") {
+        msg.innerHTML = "✅ Data & foto berhasil dikirim!";
+        e.target.reset();
+        preview.style.display = "none";
+        loadData();
+      } else msg.innerHTML = "⚠️ " + r.message;
+    } catch (err) {
+      msg.innerHTML = "❌ Gagal kirim: " + err;
+    }
+  });
+
+  const mapData = L.map('mapData').setView([-2.13, 115.10], 9);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapData);
+
+  async function loadData() {
+    const res = await fetch(proxyURL + scriptURL);
     const data = await res.json();
     mapData.eachLayer(l => { if (l instanceof L.Marker) mapData.removeLayer(l); });
     data.forEach(d => {
       if (!d.koordinat) return;
       const [lat, lng] = d.koordinat.split(",").map(Number);
-      const popup = `
-        <b>${d.lokasi}</b><br>
-        🧍 ${d.petugas}<br>
-        📅 ${d.tanggal}<br>
-        ⚙️ ${d.jenis}<br>
-        📝 ${d.keterangan}<br>
-        ${d.foto ? `<a href="${d.foto}" target="_blank">📸 Lihat Foto</a>` : ""}
-      `;
-      const icon = L.divIcon({
-        className: "custom-marker",
-        html: `<div style="background:${warnaJenis(d.jenis)};width:14px;height:14px;border-radius:50%;box-shadow:0 0 8px ${warnaJenis(d.jenis)};"></div>`
-      });
-      L.marker([lat, lng], { icon }).addTo(mapData).bindPopup(popup);
+      const popup = `<b>${d.lokasi}</b><br>🧍 ${d.petugas}<br>📅 ${d.tanggal}<br>⚙️ ${d.jenis}<br>📝 ${d.keterangan}<br>${d.foto ? `<a href="${d.foto}" target="_blank">📸 Foto</a>` : ''}`;
+      L.marker([lat, lng]).addTo(mapData).bindPopup(popup);
     });
-  } catch (err) {
-    console.error("Gagal load data:", err);
   }
-}
-
-loadData();
+  loadData();
+});
 </script>
 </body>
 </html>
