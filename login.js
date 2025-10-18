@@ -1,5 +1,6 @@
-const proxy = "https://broad-queen-be12.perluasanlistrik-bartim.workers.dev/?url=";
+const proxy = ""; // tidak pakai proxy
 const scriptURL = "https://script.google.com/macros/s/AKfycbwcMi_pBDlXeEzS5wxpIuiRmDjvkiwjgR53TmcfhGyi0DcKTSj3sgGXxfmPEpbVhUgg4g/exec";
+
 
 document.addEventListener("DOMContentLoaded", () => {
   const btn = document.getElementById("loginBtn");
