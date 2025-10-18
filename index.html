@@ -16,15 +16,19 @@ body {
 }
 
 /* Header */
-h2 {
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   background: linear-gradient(90deg, #0033ff, #00e6ff);
   color: white;
-  padding: 10px;
-  text-align: center;
+  padding: 10px 20px;
   box-shadow: 0 0 20px #00ffff;
 }
+header h2 { margin: 0; }
+#userInfo { font-weight: bold; }
 
-/* Form */
+/* Form container */
 form {
   background: rgba(0,0,20,0.9);
   margin: 20px auto;
@@ -34,7 +38,6 @@ form {
   border: 2px solid #00ffff55;
   box-shadow: 0 0 30px #00ffff33;
   position: relative;
-  overflow: hidden;
 }
 form::before {
   content: "";
@@ -44,81 +47,93 @@ form::before {
   border-radius: 15px;
   border: 2px solid #00ffff;
   filter: blur(10px);
-  opacity: 0.5;
-  animation: lightning 2s infinite linear;
+  opacity: 0.4;
+  animation: lightning 3s infinite linear;
 }
 @keyframes lightning {
-  0%, 100% { box-shadow: 0 0 15px #00ffff; opacity: 0.5; }
-  50% { box-shadow: 0 0 40px #00ffff; opacity: 1; }
+  0%,100% { opacity:0.4; box-shadow: 0 0 10px #00ffff; }
+  50% { opacity:1; box-shadow: 0 0 30px #00ffff; }
 }
 
 label {
-  display: block;
-  margin-top: 10px;
-  font-weight: bold;
+  display:block;
+  margin-top:10px;
+  font-weight:bold;
 }
 input, select, textarea {
-  width: 100%;
-  padding: 8px;
-  border: 1px solid #00ffff55;
-  border-radius: 8px;
-  background: #001122;
-  color: #0ff;
-  font-size: 14px;
+  width:100%;
+  padding:8px;
+  border:1px solid #00ffff55;
+  border-radius:8px;
+  background:#001122;
+  color:#0ff;
+  font-size:14px;
 }
-input::placeholder { color: #00cccc88; }
+input::placeholder { color:#00cccc88; }
 
 button {
-  width: 100%;
-  background: linear-gradient(90deg, #0066ff, #00ffff);
-  border: none;
-  padding: 10px;
-  color: black;
-  font-weight: bold;
-  border-radius: 8px;
-  margin-top: 10px;
-  cursor: pointer;
-  box-shadow: 0 0 10px #00ffff;
-  transition: 0.3s;
+  width:100%;
+  background:linear-gradient(90deg,#0066ff,#00ffff);
+  border:none;
+  padding:10px;
+  color:black;
+  font-weight:bold;
+  border-radius:8px;
+  margin-top:10px;
+  cursor:pointer;
+  box-shadow:0 0 10px #00ffff;
+  transition:0.3s;
 }
 button:hover {
-  box-shadow: 0 0 25px #00ffff;
-  background: linear-gradient(90deg, #00ffff, #0066ff);
+  box-shadow:0 0 25px #00ffff;
+  background:linear-gradient(90deg,#00ffff,#0066ff);
 }
 
-/* Map dan Chart */
+#logoutBtn {
+  background: linear-gradient(90deg, #ff0066, #ff6600);
+  box-shadow: 0 0 10px #ff3366;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  color: #fff;
+  font-weight: bold;
+  cursor: pointer;
+}
+#logoutBtn:hover { box-shadow: 0 0 20px #ff6600; }
+
 #map, #mapData {
-  height: 320px;
-  margin-top: 10px;
-  border-radius: 10px;
-  border: 1px solid #00ffff44;
+  height:320px;
+  border-radius:10px;
+  border:1px solid #00ffff44;
+  margin-top:10px;
 }
 #stats {
-  margin: 20px auto;
-  background: rgba(0, 10, 20, 0.9);
-  border-radius: 15px;
-  padding: 15px;
-  max-width: 900px;
-  box-shadow: 0 0 25px #00ffff44;
+  margin:20px auto;
+  background:rgba(0,10,20,0.9);
+  border-radius:15px;
+  padding:15px;
+  max-width:900px;
+  box-shadow:0 0 25px #00ffff44;
 }
-#msg {
-  text-align: center;
-  margin-top: 10px;
-  font-weight: bold;
-  color: #0ff;
-}
+#msg { text-align:center; margin-top:10px; font-weight:bold; color:#0ff; }
 </style>
 </head>
 
 <body>
-<h2>⚡ Monitoring PJU (TINJU) – Kabupaten Barito Timur ⚡</h2>
+<header>
+  <h2>⚡ Monitoring PJU (TINJU) ⚡</h2>
+  <div id="userInfo">
+    👤 <span id="namaUser">Memuat...</span>
+    <button id="logoutBtn">Logout</button>
+  </div>
+</header>
 
 <form id="tinjuForm" enctype="multipart/form-data">
   <label>Tanggal:</label>
   <input type="date" id="tanggal" required>
 
   <label>Petugas:</label>
-  <input type="text" id="petugas" required placeholder="Nama lengkap">
+  <input type="text" id="petugas" readonly required>
 
   <label>Nama Lokasi / Panel:</label>
   <input type="text" id="lokasi" required placeholder="Contoh: Panel PJU Pasar Tamiang Layang">
@@ -149,19 +164,32 @@ button:hover {
 </form>
 
 <div id="msg"></div>
-
-<div id="stats">
-  <canvas id="chartJenis"></canvas>
-</div>
-
+<div id="stats"><canvas id="chartJenis"></canvas></div>
 <div id="mapData"></div>
 
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script>
 const proxy = "https://broad-queen-be12.perluasanlistrik-bartim.workers.dev/?url=";
 const scriptURL = "https://script.google.com/macros/s/AKfycbwcMi_pBDlXeEzS5wxpIuiRmDjvkiwjgR53TmcfhGyi0DcKTSj3sgGXxfmPEpbVhUgg4g/exec";
+const namaUser = localStorage.getItem("petugas") || "";
+const roleUser = localStorage.getItem("role") || "";
+
+// --- Cek login ---
+if (!namaUser) window.location.href = "login.html";
+document.getElementById("namaUser").textContent = namaUser;
+
+// --- Logout ---
+document.getElementById("logoutBtn").onclick = () => {
+  localStorage.clear();
+  window.location.href = "login.html";
+};
+
+// --- Tanggal otomatis hari ini ---
+document.getElementById("tanggal").value = new Date().toISOString().slice(0, 10);
+document.getElementById("petugas").value = namaUser;
 
 window.onload = () => {
+  // Map input
   const map = L.map('map').setView([-2.13, 115.10], 9);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
   let marker;
@@ -187,30 +215,27 @@ window.onload = () => {
     }, () => alert("Gagal mengambil lokasi."));
   });
 
+  // --- Submit form ---
   document.getElementById('tinjuForm').addEventListener('submit', async e => {
     e.preventDefault();
-
     const koordinat = document.getElementById('koordinat').value.trim();
-    if (!koordinat) {
-      alert("⚠️ Harap ambil lokasi terlebih dahulu!");
-      return;
-    }
+    if (!koordinat) return alert("⚠️ Harap ambil koordinat terlebih dahulu!");
 
-    const fotoFile = document.getElementById('foto').files[0];
+    const file = document.getElementById('foto').files[0];
     let fotoBase64 = "";
-    if (fotoFile) {
+    if (file) {
       fotoBase64 = await new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = () => resolve(reader.result);
         reader.onerror = reject;
-        reader.readAsDataURL(fotoFile);
+        reader.readAsDataURL(file);
       });
     }
 
     const data = {
       action: "upload",
       tanggal: document.getElementById('tanggal').value,
-      petugas: document.getElementById('petugas').value,
+      petugas: namaUser,
       lokasi: document.getElementById('lokasi').value,
       koordinat: koordinat,
       jenis: document.getElementById('jenis').value,
@@ -226,7 +251,7 @@ window.onload = () => {
     });
     const r = await res.json();
     if (r.status === "success") {
-      document.getElementById('msg').innerHTML = "✅ Data & foto berhasil dikirim!";
+      document.getElementById('msg').innerHTML = "✅ Data berhasil dikirim!";
       e.target.reset();
       loadData();
     } else {
@@ -234,7 +259,7 @@ window.onload = () => {
     }
   });
 
-  // Map Output
+  // --- Map output ---
   const mapData = L.map('mapData').setView([-2.13, 115.10], 9);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(mapData);
 
@@ -246,21 +271,25 @@ window.onload = () => {
     const counts = {};
     data.forEach(d => {
       if (!d.koordinat || !d.koordinat.includes(",")) return;
+      if (roleUser === "petugas" && d.petugas !== namaUser) return;
+
       const [lat, lng] = d.koordinat.split(",").map(v => parseFloat(v.trim()));
       counts[d.jenis] = (counts[d.jenis] || 0) + 1;
 
-      const color = d.jenis === "Lampu" ? "yellow" :
-                    d.jenis === "Jaringan Kabel" ? "red" :
-                    d.jenis === "Kontroller/Proteksi" ? "cyan" :
-                    d.jenis === "Short Circuit" ? "orange" :
-                    d.jenis === "Hilang Tegangan" ? "purple" : "white";
+      const iconUrl = d.jenis === "Lampu" ? "https://cdn-icons-png.flaticon.com/512/702/702814.png"
+                    : d.jenis === "Jaringan Kabel" ? "https://cdn-icons-png.flaticon.com/512/2504/2504959.png"
+                    : d.jenis === "Kontroller/Proteksi" ? "https://cdn-icons-png.flaticon.com/512/3039/3039386.png"
+                    : d.jenis === "Short Circuit" ? "https://cdn-icons-png.flaticon.com/512/1532/1532802.png"
+                    : "https://cdn-icons-png.flaticon.com/512/929/929430.png";
 
-      const marker = L.circleMarker([lat, lng], {
-        radius: 8,
-        color: color,
-        fillOpacity: 0.8
-      }).addTo(mapData);
+      const customIcon = L.icon({
+        iconUrl: iconUrl,
+        iconSize: [28, 28],
+        iconAnchor: [14, 28],
+        popupAnchor: [0, -25]
+      });
 
+      const marker = L.marker([lat, lng], { icon: customIcon }).addTo(mapData);
       const popup = `
         <b>${d.lokasi}</b><br>
         🧍 ${d.petugas}<br>
@@ -272,7 +301,7 @@ window.onload = () => {
       marker.bindPopup(popup);
     });
 
-    // Chart Statistik
+    // Statistik Chart
     const ctx = document.getElementById("chartJenis").getContext("2d");
     new Chart(ctx, {
       type: "bar",
