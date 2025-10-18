@@ -3,79 +3,154 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>⚡ Login – TINJU PJU</title>
+<title>⚡ Dashboard TINJU PJU</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
 <style>
 body {
-  font-family: 'Segoe UI', sans-serif;
-  background: radial-gradient(circle at center, #000010, #000);
-  height:100vh; display:flex; align-items:center; justify-content:center;
-  color:#0ff; margin:0; overflow:hidden;
+  font-family:'Segoe UI',sans-serif;
+  margin:0; background:#000; color:#0ff;
 }
-.box {
-  width:340px; padding:24px;
-  background:rgba(0,10,20,.9);
-  border-radius:16px; border:2px solid #00ffff66;
-  box-shadow:0 0 25px #00ffff55;
-  position:relative;
+header {
+  display:flex; justify-content:space-between; align-items:center;
+  background:linear-gradient(90deg,#001,#004);
+  padding:10px 20px; box-shadow:0 0 15px #00ffff;
 }
-.box::before {
-  content:""; position:absolute; inset:-4px;
-  border-radius:18px; border:2px solid #00ffff;
-  filter:blur(8px); opacity:.7;
-  animation:flicker 2.8s linear infinite;
+h2 { text-align:center; color:#00ffff; text-shadow:0 0 12px #00ffff; }
+#logoutBtn {
+  background:linear-gradient(90deg,#ff0066,#ff6600);
+  color:#fff; border:none; border-radius:8px; padding:6px 12px;
+  font-weight:bold; box-shadow:0 0 10px #ff3366; cursor:pointer;
 }
-@keyframes flicker { 0%,100%{opacity:.4} 50%{opacity:1} }
-h2 { text-align:center; text-shadow:0 0 15px #00ffff; margin:0 0 14px; }
-input {
-  width:100%; padding:10px; margin:8px 0;
-  border-radius:8px; border:1px solid #00ffff44;
-  background:#001122; color:#0ff;
+#logoutBtn:hover { box-shadow:0 0 20px #ff6600; }
+
+form {
+  background:#001122; padding:15px; margin:15px auto; max-width:480px;
+  border:2px solid #00ffff66; border-radius:12px;
+  box-shadow:0 0 15px #00ffff55;
+}
+input,select,textarea {
+  width:100%; padding:8px; margin-top:5px;
+  border-radius:6px; border:1px solid #00ffff44; background:#000814; color:#0ff;
 }
 button {
   width:100%; padding:10px; border:none; border-radius:8px;
-  font-weight:bold; background:linear-gradient(90deg,#00ffff,#0077ff);
-  color:#000; cursor:pointer; box-shadow:0 0 15px #00ffff66;
+  background:linear-gradient(90deg,#00ffff,#0077ff);
+  font-weight:bold; color:#000; box-shadow:0 0 15px #00ffff66; cursor:pointer;
 }
 button:hover { box-shadow:0 0 25px #00ffff; }
-#msg { text-align:center; margin-top:10px; color:#ffb86b; font-weight:bold; }
-.small { font-size:12px; opacity:.7; text-align:center; margin-top:8px; }
+
+#map,#mapData { height:300px; margin-top:10px; border-radius:8px; }
+#msg { text-align:center; font-weight:bold; margin-top:8px; }
 </style>
 </head>
 <body>
-<div class="box">
-  <h2>⚡ LOGIN TINJU PJU</h2>
-  <input id="username" placeholder="👤 Username">
-  <input id="password" type="password" placeholder="🔒 Password">
-  <button id="loginBtn">Masuk</button>
-  <div id="msg"></div>
-  <div class="small">Kab. Barito Timur • Monitoring PJU</div>
-</div>
 
+<header>
+  <div>⚡ <b id="userName">-</b> (<span id="userRole">-</span>)</div>
+  <button id="logoutBtn">Logout</button>
+</header>
+
+<h2>📋 Monitoring PJU</h2>
+
+<form id="tinjuForm">
+  <label>Tanggal:</label><input type="date" id="tanggal" required>
+  <label>Petugas:</label><input id="petugas" readonly>
+  <label>Lokasi:</label><input id="lokasi" required>
+  <label>Koordinat:</label><input id="koordinat" required readonly placeholder="Klik peta atau Ambil Lokasi">
+  <div id="map"></div>
+  <button type="button" id="lokasiSaya">📍 Ambil Lokasi Saya</button>
+  <label>Jenis:</label>
+  <select id="jenis" required>
+    <option value="">Pilih Jenis</option>
+    <option value="Lampu">Lampu</option>
+    <option value="Jaringan Kabel">Jaringan Kabel</option>
+    <option value="Kontroller/Proteksi">Kontroller/Proteksi</option>
+    <option value="Short Circuit">Short Circuit</option>
+    <option value="Hilang Tegangan">Hilang Tegangan</option>
+    <option value="Tidak Diketahui">Tidak Diketahui</option>
+  </select>
+  <label>Keterangan:</label><textarea id="keterangan" rows="3"></textarea>
+  <label>📸 Foto:</label><input type="file" id="foto" accept="image/*">
+  <button type="submit">✅ Kirim Data</button>
+</form>
+
+<div id="msg"></div>
+<h2>🗺️ Data PJU</h2>
+<div id="mapData"></div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script>
-// 🧠 Daftar user statis (tanpa Sheet)
-const USERS = [
-  { username: "admin", password: "gacor123", nama: "Administrator", role: "admin" },
-  { username: "terry", password: "gacor123", nama: "Terry N.", role: "admin" },
-  { username: "deni", password: "gacor123", nama: "Deni W.", role: "admin" },
-  { username: "ferry", password: "123456", nama: "Ferry Andinata", role: "petugas" },
-  { username: "maman", password: "123456", nama: "Muharman", role: "petugas" }
-];
+const proxy="https://broad-queen-be12.perluasanlistrik-bartim.workers.dev/?url=";
+const scriptURL="https://script.google.com/macros/s/AKfycbwcMi_pBDlXeEzS5wxpIuiRmDjvkiwjgR53TmcfhGyi0DcKTSj3sgGXxfmPEpbVhUgg4g/exec";
 
-document.getElementById("loginBtn").addEventListener("click", () => {
-  const u = username.value.trim();
-  const p = password.value.trim();
-  const msg = document.getElementById("msg");
-  if (!u || !p) return msg.textContent = "⚠️ Lengkapi username & password";
+// cek login
+const petugas=localStorage.getItem("petugas"), role=localStorage.getItem("role");
+if(!petugas){ location.href="login.html"; }
+userName.textContent=petugas; userRole.textContent=role; petugas.value=petugas;
 
-  const user = USERS.find(x => x.username === u && x.password === p);
-  if (!user) return msg.textContent = "❌ Username atau password salah";
+// logout
+logoutBtn.onclick=()=>{ localStorage.clear(); location.href="login.html"; };
 
-  localStorage.setItem("petugas", user.nama);
-  localStorage.setItem("role", user.role);
-  msg.style.color = "#8aff8a";
-  msg.textContent = "✅ Login berhasil...";
-  setTimeout(() => window.location.href = "index.html", 800);
+// peta input
+const map=L.map("map").setView([-2.13,115.1],9);
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map);
+let marker;
+map.on("click",e=>{
+  const lat=e.latlng.lat.toFixed(6),lng=e.latlng.lng.toFixed(6);
+  koordinat.value=`${lat},${lng}`;
+  if(marker)map.removeLayer(marker);
+  marker=L.marker(e.latlng).addTo(map).bindPopup(`📍 ${lat},${lng}`).openPopup();
 });
+lokasiSaya.onclick=()=>{
+  navigator.geolocation.getCurrentPosition(p=>{
+    const lat=p.coords.latitude.toFixed(6),lng=p.coords.longitude.toFixed(6);
+    koordinat.value=`${lat},${lng}`;
+    map.setView([lat,lng],16);
+    if(marker)map.removeLayer(marker);
+    marker=L.marker([lat,lng]).addTo(map).bindPopup("📍 Lokasi Anda").openPopup();
+  });
+};
+
+// kirim data
+tinjuForm.onsubmit=async e=>{
+  e.preventDefault();
+  if(!koordinat.value.trim()) return alert("Koordinat wajib diisi!");
+  let base64="";
+  const f=foto.files[0];
+  if(f){const r=new FileReader();base64=await new Promise(res=>{r.onload=()=>res(r.result);r.readAsDataURL(f);});}
+  msg.textContent="⏳ Mengirim...";
+  const data={
+    action:"upload",tanggal:tanggal.value,petugas:petugas.value,
+    lokasi:lokasi.value,koordinat:koordinat.value,jenis:jenis.value,
+    keterangan:keterangan.value,fotoBase64:base64
+  };
+  const res=await fetch(proxy+scriptURL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(data)});
+  const r=await res.json();
+  msg.textContent=r.status==="success"?"✅ Data tersimpan!":"⚠️ "+r.message;
+  loadData();
+};
+
+// peta data
+const mapData=L.map("mapData").setView([-2.13,115.1],9);
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(mapData);
+async function loadData(){
+  const res=await fetch(proxy+scriptURL);
+  const data=await res.json();
+  mapData.eachLayer(l=>{if(l instanceof L.Marker) mapData.removeLayer(l);});
+  data.forEach(d=>{
+    if(!d.koordinat)return;
+    const [lat,lng]=d.koordinat.split(",").map(Number);
+    const icon=L.icon({
+      iconUrl:d.jenis.includes("Lampu")?"https://cdn-icons-png.flaticon.com/512/1078/1078429.png":
+              d.jenis.includes("Jaringan")?"https://cdn-icons-png.flaticon.com/512/102/102649.png":
+              "https://cdn-icons-png.flaticon.com/512/484/484167.png",
+      iconSize:[28,28]
+    });
+    const popup=`<b>${d.lokasi}</b><br>🧍 ${d.petugas}<br>📅 ${d.tanggal}<br>⚙️ ${d.jenis}<br>📝 ${d.keterangan}<br>${d.foto?`<a href="${d.foto}" target="_blank">📸 Lihat Foto</a>`:""}`;
+    L.marker([lat,lng],{icon}).addTo(mapData).bindPopup(popup);
+  });
+}
+loadData();
 </script>
 </body>
 </html>
