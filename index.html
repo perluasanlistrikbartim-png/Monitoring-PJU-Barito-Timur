@@ -3,139 +3,128 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>⚡ Admin Panel – TINJU Barito Timur</title>
+<title>TINJU ⚡ Monitoring PJU Barito Timur</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
 body {
+  font-family: "Segoe UI", sans-serif;
   margin: 0;
-  background: radial-gradient(circle at center, #01020a 0%, #000 100%);
-  font-family: 'Poppins', sans-serif;
-  color: #00eaff;
+  background: radial-gradient(circle at center, #000015, #000);
+  color: #0ff;
   overflow-x: hidden;
 }
 
-/* === Header === */
-header {
-  background: linear-gradient(90deg, #001122, #002244);
-  padding: 12px;
+/* Header */
+h2 {
+  background: linear-gradient(90deg, #0033ff, #00e6ff);
+  color: white;
+  padding: 10px;
   text-align: center;
-  color: #00ffff;
-  font-weight: 700;
-  font-size: 20px;
-  letter-spacing: 1px;
-  box-shadow: 0 0 15px #00ffff88;
-  border-bottom: 2px solid #00ffff55;
+  box-shadow: 0 0 20px #00ffff;
 }
 
-/* === Logout Neon === */
-#logoutBtn {
-  background: linear-gradient(90deg, #ff0066, #ff6600);
-  box-shadow: 0 0 10px #ff3366;
-  border: none;
-  border-radius: 6px;
-  padding: 6px 12px;
-  cursor: pointer;
-  color: #fff;
-  font-weight: bold;
-  transition: 0.3s;
-}
-#logoutBtn:hover {
-  box-shadow: 0 0 20px #ff6600;
-  transform: scale(1.05);
-}
-
-/* === Efek Arus Listrik === */
-.electric-border {
-  position: relative;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 0 25px #00ffff33, inset 0 0 20px #00ffff11;
-}
-.electric-border::before {
-  content: '';
-  position: absolute;
-  top: -2px; left: -2px; right: -2px; bottom: -2px;
-  background: linear-gradient(120deg, #00ffff, #00eaff, #007bff, #00ffff);
-  background-size: 400% 400%;
-  border-radius: 14px;
-  filter: blur(1.2px);
-  animation: electricFlow 5s linear infinite;
-  z-index: -1;
-}
-@keyframes electricFlow {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
-/* === Form Input === */
+/* Form */
 form {
-  background: rgba(0, 15, 30, 0.8);
-  padding: 20px;
+  background: rgba(0,0,20,0.9);
   margin: 20px auto;
   max-width: 480px;
-  border-radius: 12px;
-  box-shadow: 0 0 25px #00ffff33;
+  padding: 20px;
+  border-radius: 15px;
+  border: 2px solid #00ffff55;
+  box-shadow: 0 0 30px #00ffff33;
+  position: relative;
+  overflow: hidden;
 }
-label { display:block; margin-top:10px; font-weight:bold; color:#00ffff; }
+form::before {
+  content: "";
+  position: absolute;
+  top: -2px; left: -2px;
+  width: 100%; height: 100%;
+  border-radius: 15px;
+  border: 2px solid #00ffff;
+  filter: blur(10px);
+  opacity: 0.5;
+  animation: lightning 2s infinite linear;
+}
+@keyframes lightning {
+  0%, 100% { box-shadow: 0 0 15px #00ffff; opacity: 0.5; }
+  50% { box-shadow: 0 0 40px #00ffff; opacity: 1; }
+}
+
+label {
+  display: block;
+  margin-top: 10px;
+  font-weight: bold;
+}
 input, select, textarea {
-  width:100%;
-  padding:8px;
-  border-radius:6px;
-  border:1px solid #00ffff55;
-  background:rgba(0,0,0,0.6);
-  color:#00eaff;
-  font-size:14px;
-  outline:none;
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #00ffff55;
+  border-radius: 8px;
+  background: #001122;
+  color: #0ff;
+  font-size: 14px;
 }
+input::placeholder { color: #00cccc88; }
+
 button {
-  width:100%;
-  margin-top:10px;
-  background:linear-gradient(90deg,#00ffff,#007bff);
-  color:#000;
-  border:none;
-  padding:10px;
-  border-radius:6px;
-  font-weight:bold;
-  cursor:pointer;
-  transition:0.3s;
-  box-shadow:0 0 20px #00ffff55;
+  width: 100%;
+  background: linear-gradient(90deg, #0066ff, #00ffff);
+  border: none;
+  padding: 10px;
+  color: black;
+  font-weight: bold;
+  border-radius: 8px;
+  margin-top: 10px;
+  cursor: pointer;
+  box-shadow: 0 0 10px #00ffff;
+  transition: 0.3s;
 }
-button:hover { background:linear-gradient(90deg,#007bff,#00ffff); box-shadow:0 0 30px #00ffff; transform:scale(1.05); }
+button:hover {
+  box-shadow: 0 0 25px #00ffff;
+  background: linear-gradient(90deg, #00ffff, #0066ff);
+}
 
-/* === Map & Stats === */
-#mapData, #map { height:320px; border-radius:10px; margin-top:10px; }
-#msg { text-align:center; margin:10px; color:#ffcc00; font-weight:bold; }
-#stats { width:90%; max-width:600px; margin:20px auto; }
-canvas { background:#000814; border-radius:12px; box-shadow:0 0 20px #00ffff33; }
-
+/* Map dan Chart */
+#map, #mapData {
+  height: 320px;
+  margin-top: 10px;
+  border-radius: 10px;
+  border: 1px solid #00ffff44;
+}
+#stats {
+  margin: 20px auto;
+  background: rgba(0, 10, 20, 0.9);
+  border-radius: 15px;
+  padding: 15px;
+  max-width: 900px;
+  box-shadow: 0 0 25px #00ffff44;
+}
+#msg {
+  text-align: center;
+  margin-top: 10px;
+  font-weight: bold;
+  color: #0ff;
+}
 </style>
 </head>
 
 <body>
-<header>
-  ⚡ PANEL ADMIN – MONITORING PJU BARITO TIMUR ⚡
-  <div style="margin-top:5px;">
-    <span id="userInfo"></span>
-    <button id="logoutBtn">🚪 Logout</button>
-  </div>
-</header>
+<h2>⚡ Monitoring PJU (TINJU) – Kabupaten Barito Timur ⚡</h2>
 
-<!-- 🔹 Form Input -->
-<div class="electric-border">
-<form id="tinjuForm">
+<form id="tinjuForm" enctype="multipart/form-data">
   <label>Tanggal:</label>
   <input type="date" id="tanggal" required>
 
   <label>Petugas:</label>
-  <input type="text" id="petugas" readonly>
+  <input type="text" id="petugas" required placeholder="Nama lengkap">
 
   <label>Nama Lokasi / Panel:</label>
-  <input type="text" id="lokasi" required>
+  <input type="text" id="lokasi" required placeholder="Contoh: Panel PJU Pasar Tamiang Layang">
 
   <label>Koordinat:</label>
-  <input type="text" id="koordinat" readonly required>
+  <input type="text" id="koordinat" placeholder="📍 Tekan Ambil Lokasi Saya" readonly required>
   <div id="map"></div>
   <button type="button" id="lokasiSaya">📍 Ambil Lokasi Saya</button>
 
@@ -153,66 +142,61 @@ canvas { background:#000814; border-radius:12px; box-shadow:0 0 20px #00ffff33; 
   <label>Keterangan:</label>
   <textarea id="keterangan" rows="3"></textarea>
 
-  <label>📸 Upload Foto:</label>
-  <input type="file" id="foto" accept="image/*">
+  <label>📸 Upload Foto Lokasi:</label>
+  <input type="file" id="foto" name="foto" accept="image/*" capture="environment">
 
   <button type="submit">✅ Kirim Data</button>
 </form>
-</div>
 
 <div id="msg"></div>
 
-<!-- 🔹 Statistik -->
-<div class="electric-border" id="stats">
+<div id="stats">
   <canvas id="chartJenis"></canvas>
 </div>
 
-<!-- 🔹 Peta Output -->
-<div class="electric-border">
-  <div id="mapData"></div>
-</div>
+<div id="mapData"></div>
 
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script>
 const proxy = "https://broad-queen-be12.perluasanlistrik-bartim.workers.dev/?url=";
 const scriptURL = "https://script.google.com/macros/s/AKfycbwcMi_pBDlXeEzS5wxpIuiRmDjvkiwjgR53TmcfhGyi0DcKTSj3sgGXxfmPEpbVhUgg4g/exec";
 
-document.addEventListener("DOMContentLoaded", async () => {
-  const user = localStorage.getItem("petugas");
-  const role = localStorage.getItem("role");
-  if (!user) {
-    alert("⚠️ Anda harus login dahulu!");
-    window.location.href = "login.html";
-    return;
-  }
-
-  document.getElementById("userInfo").innerText = `👤 ${user} (${role})`;
-  document.getElementById("logoutBtn").addEventListener("click", () => {
-    localStorage.clear();
-    window.location.href = "login.html";
-  });
-  document.getElementById("petugas").value = user;
-  document.getElementById("tanggal").valueAsDate = new Date();
-
+window.onload = () => {
   const map = L.map('map').setView([-2.13, 115.10], 9);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
   let marker;
 
+  map.on('click', e => {
+    const lat = e.latlng.lat.toFixed(6);
+    const lng = e.latlng.lng.toFixed(6);
+    document.getElementById('koordinat').value = `${lat}, ${lng}`;
+    if (marker) map.removeLayer(marker);
+    marker = L.marker(e.latlng).addTo(map).bindPopup(`📍 ${lat}, ${lng}`).openPopup();
+  });
+
   document.getElementById('lokasiSaya').addEventListener('click', () => {
+    if (!navigator.geolocation) return alert("GPS tidak didukung.");
     navigator.geolocation.getCurrentPosition(pos => {
       const lat = pos.coords.latitude.toFixed(6);
       const lng = pos.coords.longitude.toFixed(6);
       document.getElementById('koordinat').value = `${lat}, ${lng}`;
+      map.setView([lat, lng], 17);
       if (marker) map.removeLayer(marker);
-      marker = L.marker([lat, lng]).addTo(map).bindPopup("📍 Lokasi Anda").openPopup();
-      map.setView([lat, lng], 15);
-    });
+      marker = L.marker([lat, lng]).addTo(map)
+        .bindPopup(`📍 Lokasi Anda<br>${lat}, ${lng}`).openPopup();
+    }, () => alert("Gagal mengambil lokasi."));
   });
 
-  // === Kirim data ===
-  document.getElementById("tinjuForm").addEventListener("submit", async e => {
+  document.getElementById('tinjuForm').addEventListener('submit', async e => {
     e.preventDefault();
-    const fotoFile = document.getElementById("foto").files[0];
+
+    const koordinat = document.getElementById('koordinat').value.trim();
+    if (!koordinat) {
+      alert("⚠️ Harap ambil lokasi terlebih dahulu!");
+      return;
+    }
+
+    const fotoFile = document.getElementById('foto').files[0];
     let fotoBase64 = "";
     if (fotoFile) {
       fotoBase64 = await new Promise((resolve, reject) => {
@@ -222,28 +206,35 @@ document.addEventListener("DOMContentLoaded", async () => {
         reader.readAsDataURL(fotoFile);
       });
     }
+
     const data = {
       action: "upload",
-      tanggal: document.getElementById("tanggal").value,
-      petugas: user,
-      lokasi: document.getElementById("lokasi").value,
-      koordinat: document.getElementById("koordinat").value,
-      jenis: document.getElementById("jenis").value,
-      keterangan: document.getElementById("keterangan").value,
-      fotoBase64
+      tanggal: document.getElementById('tanggal').value,
+      petugas: document.getElementById('petugas').value,
+      lokasi: document.getElementById('lokasi').value,
+      koordinat: koordinat,
+      jenis: document.getElementById('jenis').value,
+      keterangan: document.getElementById('keterangan').value,
+      fotoBase64: fotoBase64
     };
-    document.getElementById("msg").innerText = "⚡ Mengirim data...";
+
+    document.getElementById('msg').innerHTML = "⏳ Mengirim data...";
     const res = await fetch(proxy + scriptURL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data)
     });
     const r = await res.json();
-    document.getElementById("msg").innerText = r.status === "success" ? "✅ Data berhasil dikirim!" : "❌ " + r.message;
-    loadData();
+    if (r.status === "success") {
+      document.getElementById('msg').innerHTML = "✅ Data & foto berhasil dikirim!";
+      e.target.reset();
+      loadData();
+    } else {
+      document.getElementById('msg').innerHTML = "⚠️ Gagal: " + r.message;
+    }
   });
 
-  // === Map Output + Statistik ===
+  // Map Output
   const mapData = L.map('mapData').setView([-2.13, 115.10], 9);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(mapData);
 
@@ -251,50 +242,59 @@ document.addEventListener("DOMContentLoaded", async () => {
     const res = await fetch(proxy + scriptURL);
     const data = await res.json();
     mapData.eachLayer(l => { if (l instanceof L.Marker) mapData.removeLayer(l); });
+
     const counts = {};
-
     data.forEach(d => {
-      if (!d.koordinat) return;
-      const [lat, lng] = d.koordinat.split(",").map(Number);
-      const jenis = d.jenis || "Lainnya";
-      counts[jenis] = (counts[jenis] || 0) + 1;
+      if (!d.koordinat || !d.koordinat.includes(",")) return;
+      const [lat, lng] = d.koordinat.split(",").map(v => parseFloat(v.trim()));
+      counts[d.jenis] = (counts[d.jenis] || 0) + 1;
 
-      const iconColor = {
-        "Lampu": "yellow",
-        "Jaringan Kabel": "red",
-        "Kontroller/Proteksi": "cyan",
-        "Short Circuit": "orange",
-        "Hilang Tegangan": "purple",
-        "Tidak Diketahui": "gray"
-      }[jenis] || "blue";
+      const color = d.jenis === "Lampu" ? "yellow" :
+                    d.jenis === "Jaringan Kabel" ? "red" :
+                    d.jenis === "Kontroller/Proteksi" ? "cyan" :
+                    d.jenis === "Short Circuit" ? "orange" :
+                    d.jenis === "Hilang Tegangan" ? "purple" : "white";
 
-      const icon = L.divIcon({
-        className: "custom-icon",
-        html: `<div style="background:${iconColor};width:14px;height:14px;border-radius:50%;box-shadow:0 0 10px ${iconColor};"></div>`
-      });
+      const marker = L.circleMarker([lat, lng], {
+        radius: 8,
+        color: color,
+        fillOpacity: 0.8
+      }).addTo(mapData);
 
-      L.marker([lat, lng], { icon }).addTo(mapData)
-        .bindPopup(`<b>${d.lokasi}</b><br>🧍 ${d.petugas}<br>📅 ${d.tanggal}<br>⚙️ ${d.jenis}<br>📝 ${d.keterangan}`);
+      const popup = `
+        <b>${d.lokasi}</b><br>
+        🧍 ${d.petugas}<br>
+        📅 ${d.tanggal}<br>
+        ⚙️ ${d.jenis}<br>
+        📝 ${d.keterangan}<br>
+        ${d.foto ? `<a href="${d.foto}" target="_blank">📸 Lihat Foto</a>` : ''}
+      `;
+      marker.bindPopup(popup);
     });
 
     // Chart Statistik
     const ctx = document.getElementById("chartJenis").getContext("2d");
     new Chart(ctx, {
-      type: 'bar',
+      type: "bar",
       data: {
         labels: Object.keys(counts),
         datasets: [{
-          label: "Jumlah Laporan",
+          label: "Jumlah Kerusakan",
           data: Object.values(counts),
-          backgroundColor: ["#ff0","#f00","#0ff","#fa0","#a0f","#888"]
+          backgroundColor: "rgba(0,255,255,0.6)",
+          borderColor: "#00ffff",
+          borderWidth: 1
         }]
       },
-      options: { responsive: true, plugins: { legend: { display: false } } }
+      options: {
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true } }
+      }
     });
   }
 
   loadData();
-});
+};
 </script>
 </body>
 </html>
