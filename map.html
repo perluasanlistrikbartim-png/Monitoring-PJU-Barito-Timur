@@ -198,28 +198,37 @@ function updateMap(data){
 }
 
 function updateTable(data){
-  const tbody=document.querySelector("#laporanTable tbody");
-  tbody.innerHTML="";
-  data.forEach((d,i)=>{
+  const tbody = document.querySelector("#laporanTable tbody");
+  tbody.innerHTML = "";
+  data.forEach((d, i) => {
     let fotoUrl = d.foto || "";
+    let fotoImg = "-";
+
+    // ubah link Google Drive jadi direct view
     if (fotoUrl.includes("/view")) {
       const id = fotoUrl.match(/\/d\/(.*?)\//);
-      if (id && id[1]) fotoUrl = `https://drive.google.com/uc?export=view&id=${id[1]}`;
+      if (id && id[1]) {
+        fotoUrl = `https://drive.google.com/uc?export=view&id=${id[1]}`;
+        fotoImg = `<a href="${fotoUrl}" target="_blank">
+                     <img src="${fotoUrl}" style="width:60px;height:60px;object-fit:cover;border-radius:6px;border:1px solid #00ffff55;box-shadow:0 0 6px #00ffff66;">
+                   </a>`;
+      }
     }
-    const fotoLink = fotoUrl ? `<a href="${fotoUrl}" target="_blank">📸</a>` : '-';
-    const tr=document.createElement("tr");
-    tr.innerHTML=`
-      <td>${i+1}</td>
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${i + 1}</td>
       <td>${d.tanggal || '-'}</td>
       <td>${d.petugas || '-'}</td>
       <td>${d.lokasi || '-'}</td>
       <td>${d.jenis || '-'}</td>
       <td>${d.keterangan || '-'}</td>
-      <td>${fotoLink}</td>
+      <td>${fotoImg}</td>
     `;
     tbody.appendChild(tr);
   });
 }
+
 
 
 loadData();
@@ -244,5 +253,6 @@ setInterval(lightning,300);
 </script>
 </body>
 </html>
+
 
 
