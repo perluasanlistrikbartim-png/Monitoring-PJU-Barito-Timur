@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>🗺️ Monitoring PJU – Barito Timur</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
-
 <style>
 body {
   font-family: 'Segoe UI', sans-serif;
@@ -14,8 +13,6 @@ body {
   color: #0ff;
   overflow-x: hidden;
 }
-
-/* ===== HEADER ===== */
 header {
   text-align: center;
   background: linear-gradient(90deg, #001122, #003344);
@@ -27,24 +24,48 @@ header {
   border-bottom: 1px solid #00ffff44;
   box-shadow: 0 0 25px #00ffff55 inset;
 }
-
-/* ===== FILTER ===== */
-.filter-box {
-  text-align: center;
-  margin: 15px auto;
-  color: #0ff;
-}
+.filter-box {text-align:center;margin:15px auto;color:#0ff;}
 select#filterPetugas {
-  background: #001122;
-  color: #0ff;
-  border: 1px solid #00ffff66;
-  border-radius: 8px;
-  padding: 6px 10px;
-  font-size: 14px;
-  box-shadow: 0 0 10px #00ffff33 inset;
+  background:#001122;color:#0ff;border:1px solid #00ffff66;
+  border-radius:8px;padding:6px 10px;font-size:14px;
+  box-shadow:0 0 10px #00ffff33 inset;
 }
 
-/* ===== MAP ===== */
+/* === GALERI FOTO === */
+.gallery {
+  position: relative;
+  width: 95%;
+  margin: 20px auto;
+  max-width: 900px;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 0 25px #00ffff33;
+  background: #000814;
+}
+.gallery img {
+  width: 100%;
+  height: 400px;
+  object-fit: cover;
+  transition: opacity 1s ease-in-out;
+}
+.gallery button {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0,0,0,0.4);
+  border: none;
+  color: #0ff;
+  font-size: 1.8rem;
+  padding: 10px 15px;
+  cursor: pointer;
+  border-radius: 50%;
+  box-shadow: 0 0 15px #00ffff88;
+}
+.gallery button:hover {background: rgba(0,0,0,0.7);}
+.gallery .prev { left: 10px; }
+.gallery .next { right: 10px; }
+
+/* === MAP === */
 #mapData {
   height: 60vh;
   width: 100%;
@@ -53,7 +74,7 @@ select#filterPetugas {
   z-index: 2;
 }
 
-/* ===== TABLE ===== */
+/* === TABLE === */
 table {
   width: 95%;
   margin: 20px auto 30px;
@@ -74,44 +95,32 @@ th {
   color: #0ff;
   text-shadow: 0 0 6px #00ffff;
 }
-td a {
-  color: #0ff;
-  text-decoration: none;
-}
-tr:nth-child(even) {
-  background: rgba(0,255,255,0.05);
-}
-tr:hover {
-  background: rgba(0,255,255,0.1);
-}
+td a { color: #0ff; text-decoration: none; }
+tr:nth-child(even) { background: rgba(0,255,255,0.05); }
+tr:hover { background: rgba(0,255,255,0.1); }
 
-/* ===== FOOTER ===== */
+/* === FOOTER === */
 footer {
-  text-align:center;
-  padding:12px;
+  text-align:center;padding:12px;
   background:linear-gradient(90deg,#001122,#003344);
-  color:#0ff;
-  font-weight:bold;
-  text-shadow:0 0 10px #00ffffaa;
+  color:#0ff;font-weight:bold;text-shadow:0 0 10px #00ffffaa;
   border-top:1px solid #00ffff44;
   box-shadow:inset 0 0 25px #00ffff33;
   font-size:0.9rem;
 }
 
-/* ===== LIGHTNING ===== */
+/* === LIGHTNING === */
 canvas#electricFX {
   position: fixed; top: 0; left: 0;
   width: 100vw; height: 100vh;
   pointer-events: none;
-  z-index: 1;
-  opacity: .5;
+  z-index: 1; opacity: .5;
 }
 </style>
 </head>
 
 <body>
 <canvas id="electricFX"></canvas>
-
 <header>🗺️ Monitoring & Laporan PJU Barito Timur</header>
 
 <div class="filter-box">
@@ -121,6 +130,14 @@ canvas#electricFX {
   </select>
 </div>
 
+<!-- === GALERI FOTO === -->
+<div class="gallery" id="galleryBox" style="display:none;">
+  <img id="galleryImage" src="" alt="Foto PJU">
+  <button class="prev" id="prevBtn">❮</button>
+  <button class="next" id="nextBtn">❯</button>
+</div>
+
+<!-- === MAP === -->
 <div id="mapData"></div>
 
 <h3 style="text-align:center;margin-top:25px;text-shadow:0 0 10px #00ffff;">📋 Tabel Rekap Laporan PJU</h3>
@@ -147,61 +164,56 @@ canvas#electricFX {
 <script>
 const PROXY="https://broad-queen-be12.perluasanlistrik-bartim.workers.dev/?url=";
 const SCRIPT_URL="https://script.google.com/macros/s/AKfycbwcMi_pBDlXeEzS5wxpIuiRmDjvkiwjgR53TmcfhGyi0DcKTSj3sgGXxfmPEpbVhUgg4g/exec";
-
 const mapData=L.map("mapData").setView([-2.13,115.10],9);
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19}).addTo(mapData);
-let markerMap=[];
+let markerMap=[], galleryImages=[], currentIndex=0;
 
-// ======== FUNGSI ========
+// === GALERI ===
+function showGallery(imgs){
+  galleryImages=imgs;
+  if(imgs.length===0){document.getElementById("galleryBox").style.display="none";return;}
+  document.getElementById("galleryBox").style.display="block";
+  currentIndex=0;
+  document.getElementById("galleryImage").src=imgs[0];
+}
+document.getElementById("prevBtn").onclick=()=>{if(!galleryImages.length)return;currentIndex=(currentIndex-1+galleryImages.length)%galleryImages.length;document.getElementById("galleryImage").src=galleryImages[currentIndex];};
+document.getElementById("nextBtn").onclick=()=>{if(!galleryImages.length)return;currentIndex=(currentIndex+1)%galleryImages.length;document.getElementById("galleryImage").src=galleryImages[currentIndex];};
 
+// === FUNGSI MAP ===
 function setViewAndOpen(lat,lng,zoom=18){
   let best=null,bestD=Infinity;
   for(const m of markerMap){
-    const dx=m.lat-lat,dy=m.lng-lng;
-    const d2=dx*dx+dy*dy;
+    const dx=m.lat-lat,dy=m.lng-lng;const d2=dx*dx+dy*dy;
     if(d2<bestD){bestD=d2;best=m;}
   }
   mapData.setView([lat,lng],zoom);
-  if(best && Math.sqrt(bestD)<0.002) best.marker.openPopup();
+  if(best){best.marker.openPopup();}
 }
-
 function focusFromURL(){
   const q=new URLSearchParams(location.search);
-  const lat=parseFloat(q.get("lat"));
-  const lng=parseFloat(q.get("lng"));
+  const lat=parseFloat(q.get("lat"));const lng=parseFloat(q.get("lng"));
   const z=parseInt(q.get("z")||"18",10);
   if(!isNaN(lat)&&!isNaN(lng)) setViewAndOpen(lat,lng,z);
 }
-
 document.addEventListener("click",e=>{
-  const a=e.target.closest("a.coord-link");
-  if(!a)return;
-  e.preventDefault();
-  const lat=parseFloat(a.dataset.lat);
-  const lng=parseFloat(a.dataset.lng);
-  const z=parseInt(a.dataset.zoom||"18",10);
-  setViewAndOpen(lat,lng,z);
-  history.replaceState(null,"",`?lat=${lat}&lng=${lng}&z=${z}`);
+  const a=e.target.closest("a.coord-link");if(!a)return;e.preventDefault();
+  const lat=parseFloat(a.dataset.lat);const lng=parseFloat(a.dataset.lng);setViewAndOpen(lat,lng,18);
+  history.replaceState(null,"",`?lat=${lat}&lng=${lng}&z=18`);
 });
 
+// === AMBIL DATA ===
 async function loadData(){
   const res=await fetch(PROXY+SCRIPT_URL);
   const data=await res.json();
   renderData(data);
 }
-
 function renderData(data){
   const petugasSet=new Set(data.map(d=>d.petugas).filter(Boolean));
   const sel=document.getElementById("filterPetugas");
-  petugasSet.forEach(p=>{
-    const opt=document.createElement("option");
-    opt.value=p;opt.textContent=p;
-    sel.appendChild(opt);
-  });
+  petugasSet.forEach(p=>{const opt=document.createElement("option");opt.value=p;opt.textContent=p;sel.appendChild(opt);});
   sel.onchange=()=>filterData(data);
   filterData(data);
 }
-
 function filterData(data){
   const f=document.getElementById("filterPetugas").value;
   const filtered=f==="Semua"?data:data.filter(d=>d.petugas===f);
@@ -210,116 +222,67 @@ function filterData(data){
   focusFromURL();
 }
 
+// === UPDATE MAP ===
 function updateMap(data){
   mapData.eachLayer(l=>{if(l instanceof L.Marker)mapData.removeLayer(l);});
   markerMap=[];
-
+  let allImgs=[];
   data.forEach((d,i)=>{
     if(!d.koordinat||!d.koordinat.includes(","))return;
     const [lat,lng]=d.koordinat.split(",").map(Number);
-
     let fotoList=[];
     if(Array.isArray(d.foto))fotoList=d.foto.filter(Boolean);
     else if(typeof d.foto==="string"&&d.foto.trim()!=="")fotoList=[d.foto.trim()];
-
-    const fotoLinks=fotoList.map((f,idx)=>{
-      let link=f;
-      if(f.includes("/view")){
-        const id=f.match(/\/d\/(.*?)\//);
-        if(id&&id[1])link=`https://drive.google.com/uc?export=view&id=${id[1]}`;
-      }
-      return `<a href="${link}" target="_blank">📸 Foto ${idx+1}</a>`;
-    }).join("<br>");
-
-    const popup=`
-      <b>${d.lokasi||"-"}</b><br>
-      🧍 ${d.petugas||"-"}<br>
-      📅 ${d.tanggal||"-"}<br>
-      ⚙️ ${d.jenis||"-"}<br>
-      📝 ${d.keterangan||"-"}<br>
-      ${fotoLinks}
-    `;
-
+    fotoList=fotoList.map(f=>{
+      if(f.includes("/view")){const id=f.match(/\/d\/(.*?)\//);if(id&&id[1])return`https://drive.google.com/uc?export=view&id=${id[1]}`;}
+      return f;
+    });
+    allImgs.push(...fotoList);
+    const popup=`<b>${d.lokasi||"-"}</b><br>🧍 ${d.petugas||"-"}<br>📅 ${d.tanggal||"-"}<br>⚙️ ${d.jenis||"-"}<br>📝 ${d.keterangan||"-"}`;
     const icon=L.divIcon({html:`<span style='color:#0ff;font-size:20px;text-shadow:0 0 10px #00ffff;'>⚡</span>`,className:""});
     const marker=L.marker([lat,lng],{icon}).addTo(mapData).bindPopup(popup);
     markerMap.push({lat,lng,marker});
   });
+  showGallery(allImgs);
 }
 
+// === UPDATE TABEL ===
 function updateTable(data){
-  const tbody=document.querySelector("#laporanTable tbody");
-  tbody.innerHTML="";
-
+  const tbody=document.querySelector("#laporanTable tbody");tbody.innerHTML="";
   data.forEach((d,i)=>{
     let koordinatCell="-";
     if(d.koordinat&&d.koordinat.includes(",")){
       const [lat,lng]=d.koordinat.split(",").map(s=>s.trim());
-      koordinatCell=`
-        <a href="?lat=${lat}&lng=${lng}&z=18"
-           class="coord-link"
-           data-lat="${lat}" data-lng="${lng}" data-zoom="18"
-           style="color:#0ff;text-decoration:none;">
-           ${lat}, ${lng}
-        </a>`;
+      koordinatCell=`<a href="?lat=${lat}&lng=${lng}&z=18" class="coord-link" data-lat="${lat}" data-lng="${lng}" style="color:#0ff;">${lat}, ${lng}</a>`;
     }
-
     let fotoList=[];
     if(Array.isArray(d.foto))fotoList=d.foto.filter(Boolean);
     else if(typeof d.foto==="string"&&d.foto.trim()!=="")fotoList=[d.foto.trim()];
     let fotoCell="-";
     if(fotoList.length>0){
       fotoCell=fotoList.map((f,idx)=>{
-        let link=f;
-        if(f.includes("/view")){
-          const id=f.match(/\/d\/(.*?)\//);
-          if(id&&id[1])link=`https://drive.google.com/uc?export=view&id=${id[1]}`;
-        }
-        return `<a href="${link}" target="_blank" title="Foto ${idx+1}">
-                  <img src="${link}" style="width:60px;height:60px;object-fit:cover;
-                    border-radius:6px;margin:2px;border:1px solid #00ffff55;
-                    box-shadow:0 0 6px #00ffff66;">
-                </a>`;
+        let link=f;if(f.includes("/view")){const id=f.match(/\/d\/(.*?)\//);if(id&&id[1])link=`https://drive.google.com/uc?export=view&id=${id[1]}`;}
+        return `<a href="${link}" target="_blank"><img src="${link}" style="width:60px;height:60px;object-fit:cover;border-radius:6px;margin:2px;border:1px solid #00ffff55;box-shadow:0 0 6px #00ffff66;"></a>`;
       }).join("");
     }
-
     const tr=document.createElement("tr");
-    tr.innerHTML=`
-      <td>${i+1}</td>
-      <td>${d.tanggal||"-"}</td>
-      <td>${d.petugas||"-"}</td>
-      <td>${d.lokasi||"-"}</td>
-      <td>${koordinatCell}</td>
-      <td>${d.jenis||"-"}</td>
-      <td>${d.keterangan||"-"}</td>
-      <td>${fotoCell}</td>
-    `;
-    tr.addEventListener("click",()=>{
-      if(d.koordinat&&d.koordinat.includes(",")){
-        const [lat,lng]=d.koordinat.split(",").map(Number);
-        setViewAndOpen(lat,lng,18);
-      }
-    });
+    tr.innerHTML=`<td>${i+1}</td><td>${d.tanggal||"-"}</td><td>${d.petugas||"-"}</td><td>${d.lokasi||"-"}</td><td>${koordinatCell}</td><td>${d.jenis||"-"}</td><td>${d.keterangan||"-"}</td><td>${fotoCell}</td>`;
+    tr.addEventListener("click",()=>{if(d.koordinat){const [lat,lng]=d.koordinat.split(",").map(Number);setViewAndOpen(lat,lng,18);}});
     tbody.appendChild(tr);
   });
 }
 
 loadData();
 
-// ⚡ Efek kilat
+// ⚡ efek kilat
 const c=document.getElementById("electricFX"),ctx=c.getContext("2d");
 function resize(){c.width=innerWidth;c.height=innerHeight;}
 resize();addEventListener("resize",resize);
 function lightning(){
   ctx.clearRect(0,0,c.width,c.height);
-  for(let i=0;i<3;i++){
-    const sx=Math.random()*c.width;
-    ctx.beginPath();ctx.moveTo(sx,0);
-    for(let y=0;y<c.height;y+=40){
-      ctx.lineTo(sx+Math.random()*40-20,y+40);
-    }
-    ctx.strokeStyle=`rgba(0,255,255,${Math.random()*0.3+0.1})`;
-    ctx.lineWidth=1.2;ctx.shadowBlur=12;ctx.shadowColor="#0ff";ctx.stroke();
-  }
+  for(let i=0;i<3;i++){const sx=Math.random()*c.width;ctx.beginPath();ctx.moveTo(sx,0);
+    for(let y=0;y<c.height;y+=40){ctx.lineTo(sx+Math.random()*40-20,y+40);}
+    ctx.strokeStyle=`rgba(0,255,255,${Math.random()*0.3+0.1})`;ctx.lineWidth=1.2;ctx.shadowBlur=12;ctx.shadowColor="#0ff";ctx.stroke();}
 }
 setInterval(lightning,300);
 </script>
