@@ -172,6 +172,7 @@ canvas#electricFX {
 
   <label>📸 Upload Foto Lokasi (bisa lebih dari satu):</label>
   <input type="file" id="foto" accept="image/*" multiple>
+  <ul id="previewList" style="list-style:none; padding-left:0; margin-top:5px; font-size:13px; color:#0ff;"></ul>
 
   <button type="submit">✅ Kirim Data</button>
 </form>
@@ -185,6 +186,20 @@ canvas#electricFX {
 <script>
 const PROXY = "https://broad-queen-be12.perluasanlistrik-bartim.workers.dev/?url=";
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwcMi_pBDlXeEzS5wxpIuiRmDjvkiwjgR53TmcfhGyi0DcKTSj3sgGXxfmPEpbVhUgg4g/exec";
+
+// --- Preview daftar file upload ---
+document.getElementById("foto").addEventListener("change", e => {
+  const list = document.getElementById("previewList");
+  list.innerHTML = "";
+  const files = Array.from(e.target.files);
+  if (files.length === 0) return;
+  files.forEach((f,i)=>{
+    const li = document.createElement("li");
+    li.textContent = `📸 ${i+1}. ${f.name}`;
+    list.appendChild(li);
+  });
+});
+
 
 // --- MAP INPUT ---
 const map = L.map('map').setView([-2.13,115.10], 9);
@@ -294,3 +309,4 @@ setInterval(lightning,250);
 </script>
 </body>
 </html>
+
