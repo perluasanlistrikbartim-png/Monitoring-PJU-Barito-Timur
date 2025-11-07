@@ -7,7 +7,6 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
 
 <style>
-/* ======== DASAR ======== */
 body {
   font-family: 'Segoe UI', sans-serif;
   margin: 0;
@@ -16,8 +15,6 @@ body {
   overflow-x: hidden;
   position: relative;
 }
-
-/* ======== HEADER ======== */
 header {
   text-align: center;
   padding: 16px 10px;
@@ -30,15 +27,6 @@ header {
   position: relative;
   z-index: 3;
 }
-
-/* ======== FORM ======== */
-h2 {
-  text-align: center;
-  text-shadow: 0 0 12px #00ffff;
-  margin: 18px 0 10px;
-  font-size: 1.1rem;
-}
-
 form {
   background: rgba(0,15,25,.9);
   border: 1px solid #00ffff55;
@@ -51,13 +39,7 @@ form {
   position: relative;
   z-index: 2;
 }
-
-label {
-  display: block;
-  margin-top: 10px;
-  font-weight: bold;
-}
-
+label {display:block;margin-top:10px;font-weight:bold;}
 input, select, textarea {
   width: 100%;
   padding: 8px;
@@ -67,63 +49,53 @@ input, select, textarea {
   color: #0ff;
   font-size: 14px;
 }
-
 button {
   width: 100%;
-  background: linear-gradient(90deg, #00ffff, #0077ff);
-  color: #000;
-  font-weight: bold;
-  border: none;
-  border-radius: 6px;
-  padding: 10px;
-  margin-top: 10px;
-  cursor: pointer;
-  box-shadow: 0 0 15px #00ffff66;
-  transition: 0.2s ease;
+  background: linear-gradient(90deg,#00ffff,#0077ff);
+  color:#000;
+  font-weight:bold;
+  border:none;
+  border-radius:6px;
+  padding:10px;
+  margin-top:10px;
+  cursor:pointer;
+  box-shadow:0 0 15px #00ffff66;
+  transition:0.2s;
 }
-
-button:hover { box-shadow: 0 0 25px #00ffff; }
-
-#msg {
-  text-align: center;
-  margin-top: 10px;
-  font-weight: bold;
-  color: #0ff;
+button:hover{box-shadow:0 0 25px #00ffff;}
+#msg{text-align:center;margin-top:10px;font-weight:bold;color:#0ff;}
+.preview-area {
+  display:flex; flex-wrap:wrap; gap:8px; margin-top:10px;
 }
-
-/* ======== PETA ======== */
-#map, #mapData {
-  height: 320px;
-  margin-top: 10px;
-  border-radius: 10px;
-  z-index: 2;
+.preview-item {
+  position:relative;
 }
-
-/* ======== KANVAS EFEK KILAT ======== */
-canvas#electricFX {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100vw; height: 100vh;
-  pointer-events: none;
-  z-index: 1;
-  opacity: .5;
+.preview-item img {
+  width:80px; height:80px;
+  object-fit:cover;
+  border:1px solid #00ffff55;
+  border-radius:6px;
 }
-
-/* ======== RESPONSIVE ======== */
-@media (max-width: 600px) {
-  form { padding: 15px; }
-  h2 { font-size: 1rem; }
-  input, select, textarea { font-size: 13px; }
+.preview-item span {
+  position:absolute;
+  top:-6px; right:-6px;
+  background:#f00; color:#fff;
+  font-size:10px;
+  padding:2px 5px;
+  border-radius:50%;
+  cursor:pointer;
+  box-shadow:0 0 5px #000;
 }
+#map,#mapData{height:320px;margin-top:10px;border-radius:10px;z-index:2;}
+canvas#electricFX{position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:1;opacity:.5;}
 </style>
 </head>
 
 <body>
 <canvas id="electricFX"></canvas>
-
 <header>⚡ <b>TINJU PJU Barito Timur</b></header>
 
-<h2>📋 Form Monitoring PJU</h2>
+<h2 style="text-align:center;text-shadow:0 0 12px #00ffff;">📋 Form Monitoring PJU</h2>
 
 <form id="tinjuForm">
   <label>Tanggal:</label>
@@ -157,161 +129,150 @@ canvas#electricFX {
   <label>Jenis Kerusakan:</label>
   <select id="jenis" required>
     <option value="">Pilih Jenis</option>
-    <option value="Lampu">Lampu</option>
-    <option value="Jaringan Kabel">Jaringan Kabel</option>
-    <option value="Kontroller/Proteksi">Kontroller/Proteksi</option>
-    <option value="Short Circuit">Short Circuit</option>
-    <option value="Hilang Tegangan">Hilang Tegangan</option>
-    <option value="Tidak Diketahui">Tidak Diketahui</option>
+    <option>Lampu</option><option>Jaringan Kabel</option>
+    <option>Kontroller/Proteksi</option><option>Short Circuit</option>
+    <option>Hilang Tegangan</option><option>Tidak Diketahui</option>
   </select>
 
   <label>Keterangan:</label>
   <textarea id="keterangan" rows="3" placeholder="Tuliskan kondisi / catatan tambahan..."></textarea>
 
-  <label>📸 Upload Foto Lokasi (bisa lebih dari satu):</label>
-  <input type="file" id="foto" accept="image/*" multiple>
-  <ul id="previewList" style="list-style:none; padding-left:0; margin-top:5px; font-size:13px; color:#0ff;"></ul>
+  <label>📸 Foto Lokasi:</label>
+  <div id="fotoArea">
+    <input type="file" class="fotoInput" accept="image/*">
+  </div>
+  <div class="preview-area" id="previewArea"></div>
+  <button type="button" id="addFotoBtn">+ Tambah Foto Lagi</button>
 
   <button type="submit">✅ Kirim Data</button>
 </form>
 
 <div id="msg"></div>
 
-<h2>🗺️ Peta Data PJU</h2>
+<h2 style="text-align:center;text-shadow:0 0 12px #00ffff;">🗺️ Peta Data PJU</h2>
 <div id="mapData"></div>
 
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script>
-const PROXY = "https://broad-queen-be12.perluasanlistrik-bartim.workers.dev/?url=";
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwcMi_pBDlXeEzS5wxpIuiRmDjvkiwjgR53TmcfhGyi0DcKTSj3sgGXxfmPEpbVhUgg4g/exec";
+const PROXY="https://broad-queen-be12.perluasanlistrik-bartim.workers.dev/?url=";
+const SCRIPT_URL="https://script.google.com/macros/s/AKfycbwcMi_pBDlXeEzS5wxpIuiRmDjvkiwjgR53TmcfhGyi0DcKTSj3sgGXxfmPEpbVhUgg4g/exec";
+let fotoFiles=[];
 
-// === Preview daftar file ===
-document.getElementById("foto").addEventListener("change", e => {
-  const list = document.getElementById("previewList");
-  list.innerHTML = "";
-  Array.from(e.target.files).forEach((f,i)=>{
-    const li = document.createElement("li");
-    li.textContent = `📸 ${i+1}. ${f.name}`;
-    list.appendChild(li);
-  });
+// tambah foto input baru
+document.getElementById("addFotoBtn").addEventListener("click",()=>{
+  const input=document.createElement("input");
+  input.type="file"; input.accept="image/*"; input.className="fotoInput";
+  input.addEventListener("change",handleFotoSelect);
+  document.getElementById("fotoArea").appendChild(input);
 });
 
-// === MAP INPUT ===
-const map = L.map('map').setView([-2.13,115.10], 9);
+// handle setiap file yang dipilih
+function handleFotoSelect(e){
+  const file=e.target.files[0];
+  if(!file)return;
+  fotoFiles.push(file);
+  const reader=new FileReader();
+  reader.onload=()=>{
+    const div=document.createElement("div");
+    div.className="preview-item";
+    div.innerHTML=`<img src="${reader.result}"><span>×</span>`;
+    div.querySelector("span").onclick=()=>{
+      div.remove();
+      fotoFiles=fotoFiles.filter(f=>f!==file);
+    };
+    document.getElementById("previewArea").appendChild(div);
+  };
+  reader.readAsDataURL(file);
+}
+document.querySelector(".fotoInput").addEventListener("change",handleFotoSelect);
+
+// === Map input ===
+const map=L.map('map').setView([-2.13,115.10],9);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(map);
 let marker;
-map.on('click', e=>{
-  const lat = e.latlng.lat.toFixed(6);
-  const lng = e.latlng.lng.toFixed(6);
-  document.getElementById('koordinat').value = `${lat},${lng}`;
-  if (marker) map.removeLayer(marker);
-  marker = L.marker(e.latlng).addTo(map).bindPopup(`📍 ${lat},${lng}`).openPopup();
+map.on('click',e=>{
+  const lat=e.latlng.lat.toFixed(6);
+  const lng=e.latlng.lng.toFixed(6);
+  document.getElementById('koordinat').value=`${lat},${lng}`;
+  if(marker)map.removeLayer(marker);
+  marker=L.marker(e.latlng).addTo(map).bindPopup(`📍 ${lat},${lng}`).openPopup();
 });
-document.getElementById("lokasiSaya").addEventListener("click", ()=>{
-  if (!navigator.geolocation) return alert("GPS tidak didukung browser ini.");
+document.getElementById("lokasiSaya").onclick=()=>{
+  if(!navigator.geolocation)return alert("GPS tidak didukung browser ini.");
   navigator.geolocation.getCurrentPosition(pos=>{
-    const lat = pos.coords.latitude.toFixed(6);
-    const lng = pos.coords.longitude.toFixed(6);
-    document.getElementById('koordinat').value = `${lat},${lng}`;
+    const lat=pos.coords.latitude.toFixed(6);
+    const lng=pos.coords.longitude.toFixed(6);
+    document.getElementById('koordinat').value=`${lat},${lng}`;
     map.setView([lat,lng],17);
-    if (marker) map.removeLayer(marker);
-    marker = L.marker([lat,lng]).addTo(map).bindPopup("📍 Lokasi Anda").openPopup();
-  }, ()=>alert("Gagal mengambil lokasi."));
-});
+    if(marker)map.removeLayer(marker);
+    marker=L.marker([lat,lng]).addTo(map).bindPopup("📍 Lokasi Anda").openPopup();
+  },()=>alert("Gagal mengambil lokasi."));
+};
 
-// === SUBMIT DATA ===
-document.getElementById("tinjuForm").addEventListener("submit", async e=>{
+// === Submit ===
+document.getElementById("tinjuForm").addEventListener("submit",async e=>{
   e.preventDefault();
-
-  const files = Array.from(document.getElementById("foto").files);
-  if (files.length === 0) return alert("Pilih minimal satu foto!");
-  const fotoBase64List = await Promise.all(files.map(file => new Promise((res,rej)=>{
-    const r = new FileReader();
-    r.onload=()=>res(r.result);
-    r.onerror=rej;
-    r.readAsDataURL(file);
+  if(fotoFiles.length===0)return alert("Tambahkan minimal 1 foto.");
+  const fotoBase64List=await Promise.all(fotoFiles.map(file=>new Promise((res,rej)=>{
+    const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(file);
   })));
-
-  const data = {
+  const data={
     action:"upload",
-    tanggal: document.getElementById("tanggal").value,
-    petugas: document.getElementById("petugas").value,
-    lokasi: document.getElementById("lokasi").value,
-    koordinat: document.getElementById("koordinat").value,
-    jenis: document.getElementById("jenis").value,
-    keterangan: document.getElementById("keterangan").value,
+    tanggal:document.getElementById("tanggal").value,
+    petugas:document.getElementById("petugas").value,
+    lokasi:document.getElementById("lokasi").value,
+    koordinat:document.getElementById("koordinat").value,
+    jenis:document.getElementById("jenis").value,
+    keterangan:document.getElementById("keterangan").value,
     fotoBase64List
   };
-
   document.getElementById("msg").textContent="⚡ Mengirim data...";
-  try {
-    const res = await fetch(PROXY+SCRIPT_URL,{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify(data)
-    });
-    const r = await res.json();
-    if (r.status==="success"){
-      document.getElementById("msg").textContent="✅ Data berhasil dikirim!";
-      document.getElementById("tinjuForm").reset();
-      document.getElementById("previewList").innerHTML="";
-      loadData();
-    } else document.getElementById("msg").textContent="⚠️ "+r.message;
-  } catch(err) {
-    document.getElementById("msg").textContent="❌ Gagal mengirim data!";
-    console.error(err);
-  }
+  const res=await fetch(PROXY+SCRIPT_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(data)});
+  const r=await res.json();
+  if(r.status==="success"){
+    document.getElementById("msg").textContent="✅ Data berhasil dikirim!";
+    document.getElementById("tinjuForm").reset();
+    document.getElementById("previewArea").innerHTML="";
+    fotoFiles=[];
+    loadData();
+  }else document.getElementById("msg").textContent="⚠️ "+r.message;
 });
 
-// === MAP OUTPUT ===
-const mapData = L.map("mapData").setView([-2.13,115.10],9);
+// === Map Output ===
+const mapData=L.map("mapData").setView([-2.13,115.10],9);
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19}).addTo(mapData);
-
 async function loadData(){
-  try{
-    const res = await fetch(PROXY+SCRIPT_URL);
-    const data = await res.json();
-    mapData.eachLayer(l=>{if(l instanceof L.Marker) mapData.removeLayer(l);});
-    data.forEach(d=>{
-      if(!d.koordinat) return;
-      const [lat,lng]=d.koordinat.split(",").map(Number);
-      let fotoHTML = "";
-      if (d.foto && Array.isArray(d.foto)) {
-        fotoHTML = d.foto.map((f,i)=>`<a href="${f}" target="_blank">📸 Foto ${i+1}</a>`).join("<br>");
-      } else if (d.foto) {
-        fotoHTML = `<a href="${d.foto}" target="_blank">📸 Lihat Foto</a>`;
-      }
-      const popup=`<b>${d.lokasi}</b><br>🧍 ${d.petugas}<br>📅 ${d.tanggal}<br>⚙️ ${d.jenis}<br>📝 ${d.keterangan}<br>${fotoHTML}`;
-      const icon = L.divIcon({html:`<span style='color:#0ff;font-size:20px;text-shadow:0 0 10px #00ffff;'>⚡</span>`,className:""});
-      L.marker([lat,lng],{icon}).addTo(mapData).bindPopup(popup);
-    });
-  }catch(err){console.error("Gagal load data:",err);}
+  const res=await fetch(PROXY+SCRIPT_URL);
+  const data=await res.json();
+  mapData.eachLayer(l=>{if(l instanceof L.Marker)mapData.removeLayer(l);});
+  data.forEach(d=>{
+    if(!d.koordinat)return;
+    const [lat,lng]=d.koordinat.split(",").map(Number);
+    const fotos=Array.isArray(d.foto)?d.foto:[d.foto];
+    const links=fotos.filter(Boolean).map((f,i)=>`<a href="${f}" target="_blank">📸 Foto ${i+1}</a>`).join("<br>");
+    const popup=`<b>${d.lokasi}</b><br>🧍 ${d.petugas}<br>📅 ${d.tanggal}<br>⚙️ ${d.jenis}<br>📝 ${d.keterangan}<br>${links}`;
+    const icon=L.divIcon({html:`<span style='color:#0ff;font-size:20px;text-shadow:0 0 10px #00ffff;'>⚡</span>`,className:""});
+    L.marker([lat,lng],{icon}).addTo(mapData).bindPopup(popup);
+  });
 }
 loadData();
 
-// === Efek Kilat Menyeluruh ===
-const c = document.getElementById("electricFX");
-const ctx = c.getContext("2d");
-function resize(){ c.width = innerWidth; c.height = innerHeight; }
-resize(); addEventListener("resize",resize);
-
+// === Efek Kilat ===
+const c=document.getElementById("electricFX");const ctx=c.getContext("2d");
+function resize(){c.width=innerWidth;c.height=innerHeight;}
+resize();addEventListener("resize",resize);
 function lightning(){
   ctx.clearRect(0,0,c.width,c.height);
   for(let i=0;i<4;i++){
-    const startX = Math.random()*c.width;
-    const seg = Math.floor(Math.random()*10)+6;
-    ctx.beginPath();
-    ctx.moveTo(startX,0);
+    const sx=Math.random()*c.width;const seg=8;
+    ctx.beginPath();ctx.moveTo(sx,0);
     for(let j=0;j<seg;j++){
-      const x = startX + Math.random()*40 - 20;
-      const y = (j/seg)*c.height;
+      const x=sx+Math.random()*40-20;
+      const y=(j/seg)*c.height;
       ctx.lineTo(x,y);
     }
     ctx.strokeStyle=`rgba(0,255,255,${Math.random()*0.4+0.1})`;
-    ctx.lineWidth=1.1;
-    ctx.shadowBlur=12;
-    ctx.shadowColor="#0ff";
-    ctx.stroke();
+    ctx.lineWidth=1.2;ctx.shadowBlur=12;ctx.shadowColor="#0ff";ctx.stroke();
   }
 }
 setInterval(lightning,250);
