@@ -173,24 +173,32 @@ function filterData(data){
 function updateMap(data){
   mapData.eachLayer(l=>{if(l instanceof L.Marker)mapData.removeLayer(l);});
   data.forEach(d=>{
-    if(!d.koordinat)return;
-    const [lat,lng]=d.koordinat.split(",").map(Number);
-    const fotos=(d.foto||"").split(" | ").filter(Boolean);
-    const links=fotos.map((f,i)=>`<a href="${f}" target="_blank">📸 Foto ${i+1}</a>`).join("<br>");
-    const popup=`<b>${d.lokasi}</b><br>🧍 ${d.petugas}<br>📅 ${d.tanggal}<br>⚙️ ${d.jenis}<br>📝 ${d.keterangan}<br>${links}`;
-    const icon=L.divIcon({html:`<span style='color:#0ff;font-size:20px;text-shadow:0 0 10px #00ffff;'>⚡</span>`,className:""});
+    if(!d.koordinat) return;
+    const [lat,lng] = d.koordinat.split(",").map(Number);
+    // pisah link pakai | atau , atau spasi
+    const fotos = (d.foto || "").split(/[,|]+/).map(s=>s.trim()).filter(Boolean);
+    const links = fotos.map((f,i)=>`<a href="${f}" target="_blank">📸 Foto ${i+1}</a>`).join("<br>");
+    const popup = `
+      <b>${d.lokasi}</b><br>
+      🧍 ${d.petugas}<br>
+      📅 ${d.tanggal}<br>
+      ⚙️ ${d.jenis}<br>
+      📝 ${d.keterangan}<br>
+      ${links}
+    `;
+    const icon = L.divIcon({html:`<span style='color:#0ff;font-size:20px;text-shadow:0 0 10px #00ffff;'>⚡</span>`,className:""});
     L.marker([lat,lng],{icon}).addTo(mapData).bindPopup(popup);
   });
 }
 
 function updateTable(data){
-  const tbody=document.querySelector("#laporanTable tbody");
-  tbody.innerHTML="";
+  const tbody = document.querySelector("#laporanTable tbody");
+  tbody.innerHTML = "";
   data.forEach((d,i)=>{
-    const fotos=(d.foto||"").split(" | ").filter(Boolean);
-    const links=fotos.map((f,j)=>`<a href="${f}" target="_blank">📸 ${j+1}</a>`).join(" ");
-    const tr=document.createElement("tr");
-    tr.innerHTML=`
+    const fotos = (d.foto || "").split(/[,|]+/).map(s=>s.trim()).filter(Boolean);
+    const links = fotos.map((f,j)=>`<a href="${f}" target="_blank">📸 ${j+1}</a>`).join(" ");
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
       <td>${i+1}</td>
       <td>${d.tanggal}</td>
       <td>${d.petugas}</td>
@@ -202,6 +210,7 @@ function updateTable(data){
     tbody.appendChild(tr);
   });
 }
+
 loadData();
 
 // ⚡ Efek kilat
@@ -224,3 +233,4 @@ setInterval(lightning,300);
 </script>
 </body>
 </html>
+
