@@ -82,9 +82,7 @@ button {
   transition: 0.2s ease;
 }
 
-button:hover {
-  box-shadow: 0 0 25px #00ffff;
-}
+button:hover { box-shadow: 0 0 25px #00ffff; }
 
 #msg {
   text-align: center;
@@ -171,12 +169,10 @@ canvas#electricFX {
   <textarea id="keterangan" rows="3" placeholder="Tuliskan kondisi / catatan tambahan..."></textarea>
 
   <label>📸 Upload Foto Lokasi (bisa lebih dari satu):</label>
-  <label>📸 Upload Foto Lokasi (bisa lebih dari satu):</label>
-<input type="file" id="foto" accept="image/*" multiple>
-<ul id="previewList" style="list-style:none; padding-left:0; margin-top:5px; font-size:13px; color:#0ff;"></ul>
+  <input type="file" id="foto" accept="image/*" multiple>
+  <ul id="previewList" style="list-style:none; padding-left:0; margin-top:5px; font-size:13px; color:#0ff;"></ul>
 
-<button type="submit">✅ Kirim Data</button>
-
+  <button type="submit">✅ Kirim Data</button>
 </form>
 
 <div id="msg"></div>
@@ -189,21 +185,18 @@ canvas#electricFX {
 const PROXY = "https://broad-queen-be12.perluasanlistrik-bartim.workers.dev/?url=";
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwcMi_pBDlXeEzS5wxpIuiRmDjvkiwjgR53TmcfhGyi0DcKTSj3sgGXxfmPEpbVhUgg4g/exec";
 
-// --- Preview daftar file upload ---
+// === Preview daftar file ===
 document.getElementById("foto").addEventListener("change", e => {
   const list = document.getElementById("previewList");
   list.innerHTML = "";
-  const files = Array.from(e.target.files);
-  if (files.length === 0) return;
-  files.forEach((f,i)=>{
+  Array.from(e.target.files).forEach((f,i)=>{
     const li = document.createElement("li");
     li.textContent = `📸 ${i+1}. ${f.name}`;
     list.appendChild(li);
   });
 });
 
-
-// --- MAP INPUT ---
+// === MAP INPUT ===
 const map = L.map('map').setView([-2.13,115.10], 9);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(map);
 let marker;
@@ -226,11 +219,12 @@ document.getElementById("lokasiSaya").addEventListener("click", ()=>{
   }, ()=>alert("Gagal mengambil lokasi."));
 });
 
-// --- SUBMIT DATA ---
+// === SUBMIT DATA ===
 document.getElementById("tinjuForm").addEventListener("submit", async e=>{
   e.preventDefault();
 
   const files = Array.from(document.getElementById("foto").files);
+  if (files.length === 0) return alert("Pilih minimal satu foto!");
   const fotoBase64List = await Promise.all(files.map(file => new Promise((res,rej)=>{
     const r = new FileReader();
     r.onload=()=>res(r.result);
@@ -250,13 +244,26 @@ document.getElementById("tinjuForm").addEventListener("submit", async e=>{
   };
 
   document.getElementById("msg").textContent="⚡ Mengirim data...";
-  const res = await fetch(PROXY+SCRIPT_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(data)});
-  const r = await res.json();
-  if (r.status==="success"){document.getElementById("msg").textContent="✅ Data berhasil dikirim!"; loadData();}
-  else document.getElementById("msg").textContent="⚠️ "+r.message;
+  try {
+    const res = await fetch(PROXY+SCRIPT_URL,{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify(data)
+    });
+    const r = await res.json();
+    if (r.status==="success"){
+      document.getElementById("msg").textContent="✅ Data berhasil dikirim!";
+      document.getElementById("tinjuForm").reset();
+      document.getElementById("previewList").innerHTML="";
+      loadData();
+    } else document.getElementById("msg").textContent="⚠️ "+r.message;
+  } catch(err) {
+    document.getElementById("msg").textContent="❌ Gagal mengirim data!";
+    console.error(err);
+  }
 });
 
-// --- MAP OUTPUT ---
+// === MAP OUTPUT ===
 const mapData = L.map("mapData").setView([-2.13,115.10],9);
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19}).addTo(mapData);
 
@@ -282,7 +289,7 @@ async function loadData(){
 }
 loadData();
 
-// === Efek Kilat Menyeluruh (ringan) ===
+// === Efek Kilat Menyeluruh ===
 const c = document.getElementById("electricFX");
 const ctx = c.getContext("2d");
 function resize(){ c.width = innerWidth; c.height = innerHeight; }
@@ -290,19 +297,19 @@ resize(); addEventListener("resize",resize);
 
 function lightning(){
   ctx.clearRect(0,0,c.width,c.height);
-  for(let i=0;i<5;i++){
+  for(let i=0;i<4;i++){
     const startX = Math.random()*c.width;
-    const segments = Math.floor(Math.random()*10)+5;
+    const seg = Math.floor(Math.random()*10)+6;
     ctx.beginPath();
     ctx.moveTo(startX,0);
-    for(let j=0;j<segments;j++){
+    for(let j=0;j<seg;j++){
       const x = startX + Math.random()*40 - 20;
-      const y = (j/segments)*c.height;
+      const y = (j/seg)*c.height;
       ctx.lineTo(x,y);
     }
     ctx.strokeStyle=`rgba(0,255,255,${Math.random()*0.4+0.1})`;
-    ctx.lineWidth=1.2;
-    ctx.shadowBlur=10;
+    ctx.lineWidth=1.1;
+    ctx.shadowBlur=12;
     ctx.shadowColor="#0ff";
     ctx.stroke();
   }
@@ -311,5 +318,3 @@ setInterval(lightning,250);
 </script>
 </body>
 </html>
-
-
