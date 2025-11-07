@@ -219,33 +219,46 @@ function updateMap(data){
 
 
 function updateTable(data){
-  const tbody=document.querySelector("#laporanTable tbody");
-  tbody.innerHTML="";
+  const tbody = document.querySelector("#laporanTable tbody");
+  tbody.innerHTML = "";
 
-  data.forEach((d,i)=>{
-    // --- handle foto (bisa string atau array) ---
+  data.forEach((d, i) => {
+    // --- Normalisasi data foto (bisa string, array, null, atau undefined) ---
     let fotoList = [];
     if (Array.isArray(d.foto)) {
-      fotoList = d.foto.filter(Boolean);
+      fotoList = d.foto.filter(f => f && f.trim() !== "");
     } else if (typeof d.foto === "string" && d.foto.trim() !== "") {
       fotoList = [d.foto.trim()];
     }
 
+    // --- Buat cell foto ---
     let fotoCell = "-";
     if (fotoList.length > 0) {
-      fotoCell = fotoList.map((f, idx)=>{
+      fotoCell = fotoList.map((f, idx) => {
         let link = f;
+        // ubah link GDrive /view → direct view
         if (f.includes("/view")) {
           const id = f.match(/\/d\/(.*?)\//);
           if (id && id[1]) link = `https://drive.google.com/uc?export=view&id=${id[1]}`;
         }
-        return `<a href="${link}" target="_blank">🔗 Foto ${idx+1}</a>`;
-      }).join("<br>");
+        // tampilkan gambar kecil + link
+        return `
+          <a href="${link}" target="_blank" title="Lihat Foto ${idx+1}">
+            <img src="${link}" 
+                 alt="foto${idx+1}" 
+                 style="width:60px;height:60px;object-fit:cover;
+                        border-radius:6px;margin:2px;
+                        border:1px solid #00ffff55;
+                        box-shadow:0 0 6px #00ffff66;">
+          </a>
+        `;
+      }).join("");
     }
 
-    const tr=document.createElement("tr");
-    tr.innerHTML=`
-      <td>${i+1}</td>
+    // --- Buat baris tabel ---
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${i + 1}</td>
       <td>${d.tanggal || '-'}</td>
       <td>${d.petugas || '-'}</td>
       <td>${d.lokasi || '-'}</td>
@@ -253,13 +266,16 @@ function updateTable(data){
       <td>${d.keterangan || '-'}</td>
       <td>${fotoCell}</td>
     `;
-    tr.addEventListener("click",()=>{
+
+    // --- Klik baris tabel → zoom ke marker di peta ---
+    tr.addEventListener("click", () => {
       const marker = markerMap[i];
       if (marker) {
-        mapData.setView(marker.getLatLng(),16);
+        mapData.setView(marker.getLatLng(), 16);
         marker.openPopup();
       }
     });
+
     tbody.appendChild(tr);
   });
 }
@@ -316,4 +332,5 @@ setInterval(lightning,300);
 </script>
 </body>
 </html>
+
 
