@@ -3,108 +3,112 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TINJU – Monitoring PJU Barito Timur</title>
-
-<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<title>🗺️ Peta & Tabel Laporan PJU – Barito Timur</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
 <style>
-body { margin:0; padding:0; font-family: Arial, sans-serif; }
-#map { height: 100vh; }
-.info-box {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  background: white;
-  padding: 10px 15px;
+body {
+  font-family: 'Segoe UI', sans-serif;
+  margin: 0;
+  background: radial-gradient(circle at center, #000020, #000);
+  color: #0ff;
+  overflow-x: hidden;
+}
+
+/* ===== HEADER ===== */
+header {
+  text-align: center;
+  background: linear-gradient(180deg, #001122, #000);
+  padding: 20px 10px;
+  color: #0ff;
+  font-weight: bold;
+  box-shadow: 0 0 25px #00ffff55 inset;
+}
+.header-logo {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 6px;
+  animation: zoomLogo 10s ease-in-out infinite;
+  filter: drop-shadow(0 0 20px #00ffffaa);
+}
+.header-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  opacity: 0.9;
+}
+@keyframes zoomLogo {
+  0%,100%{transform:scale(1);}50%{transform:scale(1.08);}
+}
+.header-title {
+  font-size: 1.3rem;
+  text-shadow: 0 0 10px #00ffff, 0 0 25px #0088ff;
+}
+.header-sub {
+  font-size: 0.9rem;
+  color: #aaf;
+  text-shadow: 0 0 8px #00ffff77;
+  margin-top: 4px;
+}
+
+/* ===== FILTER ===== */
+.filter-box {
+  text-align: center;
+  margin: 10px auto;
+  color: #0ff;
+}
+select#filterPetugas {
+  background: #001122;
+  color: #0ff;
+  border: 1px solid #00ffff66;
   border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  padding: 6px 10px;
   font-size: 14px;
-}
-</style>
-</head>
-<body>
-
-<div class="info-box" id="rekap">🔄 Memuat data...</div>
-<div id="map"></div>
-
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-
-<script>
-// === KONFIGURASI GOOGLE SHEET CSV ===
-// Ganti link di bawah dengan link CSV publik dari Sheet kamu
-const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT8XYZ123abc/pub?output=csv";
-
-// === Warna marker sesuai jenis kerusakan ===
-function warnaKerusakan(jenis) {
-  const colors = {
-    "Lampu": "yellow",
-    "Jaringan Kabel": "orange",
-    "Alat Proteksi & Kontroller": "red",
-    "Short Circuit": "black",
-    "Hilang Tegangan Sebelum KWh Meter": "blue",
-    "Tidak Diketahui Kerusakannya": "gray"
-  };
-  return colors[jenis] || "green";
+  box-shadow: 0 0 10px #00ffff33 inset;
 }
 
-// === Peta dasar ===
-const map = L.map('map').setView([-2.13, 115.10], 9);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  attribution:'© OpenStreetMap contributors'
-}).addTo(map);
+/* ===== PETA ===== */
+#mapData {
+  height: 60vh;
+  width: 100%;
+  border-top: 1px solid #00ffff55;
+  box-shadow: 0 0 20px #00ffff44 inset;
+  z-index: 2;
+}
 
-// === Ambil data CSV dari Sheet ===
-fetch(SHEET_URL)
-  .then(res => res.text())
-  .then(csv => {
-    const rows = csv.split("\n").slice(1); // lewati header
-    let total = 0;
-    let rekap = {};
+/* ===== TABEL ===== */
+table {
+  width: 95%;
+  margin: 15px auto 25px;
+  border-collapse: collapse;
+  background: rgba(0, 20, 40, 0.8);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 0 20px #00ffff33;
+}
+th, td {
+  border: 1px solid #00ffff33;
+  padding: 8px;
+  font-size: 13px;
+  text-align: left;
+}
+th {
+  background: linear-gradient(90deg,#003355,#001122);
+  color: #0ff;
+  text-shadow: 0 0 6px #00ffff;
+}
+td a {
+  color: #0ff;
+  text-decoration: none;
+}
+tr:nth-child(even) {
+  background: rgba(0,255,255,0.05);
+}
 
-    rows.forEach(row => {
-      const cols = row.split(",");
-
-      const tanggal = cols[0];
-      const petugas = cols[1];
-      const lokasi = cols[2];
-      const koordinat = cols[3];
-      const jenis = cols[4];
-      const ket = cols[5];
-
-      if (!koordinat || !koordinat.includes(",")) return;
-      const [lat, lng] = koordinat.split(",").map(v => parseFloat(v));
-
-      const color = warnaKerusakan(jenis);
-      const marker = L.circleMarker([lat, lng], {
-        radius: 8,
-        fillColor: color,
-        color: "#000",
-        weight: 1,
-        opacity: 1,
-        fillOpacity: 0.8
-      }).addTo(map);
-
-      marker.bindPopup(`
-        <b>${lokasi}</b><br>
-        📅 ${tanggal}<br>
-        👷 ${petugas}<br>
-        ⚙️ ${jenis}<br>
-        📝 ${ket || "-"}
-      `);
-
-      total++;
-      rekap[jenis] = (rekap[jenis] || 0) + 1;
-    });
-
-    // === Tampilkan Rekap di Atas Peta ===
-    let text = `📊 <b>Total Titik:</b> ${total}<br>`;
-    for (const [jenis, jml] of Object.entries(rekap)) {
-      text += `• ${jenis}: ${jml}<br>`;
-    }
-    document.getElementById("rekap").innerHTML = text;
-  })
-  .catch(err => {
-    document.getElementById("rekap").innerHTML = "❌ Gagal memuat data: " + err;
-  });
-</script>
-</body>
-</html>
+/* ===== FOOTER ===== */
+footer {
+  text-align:center;
+  padding:12px;
+  background:linear-gradient(90deg,#001122,#003344);
+  color:#0ff;
+  font-weight:bold;
+  text-shadow:0 0 10px #00ffffaa;
