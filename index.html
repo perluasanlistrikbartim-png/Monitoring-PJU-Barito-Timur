@@ -7,78 +7,115 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
 
 <style>
+/* ======== DASAR ======== */
 body {
   font-family: 'Segoe UI', sans-serif;
   margin: 0;
-  background: radial-gradient(circle at center, #000015, #000);
+  background: radial-gradient(circle at center, #000020, #000);
   color: #0ff;
   overflow-x: hidden;
   position: relative;
 }
 
-/* ====== HEADER ====== */
+/* ======== HEADER ======== */
 header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  text-align: center;
+  padding: 16px 10px;
   background: linear-gradient(90deg,#001122,#003344);
-  padding: 12px 20px;
   color: #0ff;
   font-weight: bold;
-  box-shadow: 0 0 25px #00ffff66;
+  font-size: 1.1rem;
+  text-shadow: 0 0 8px #00ffffaa;
+  box-shadow: 0 0 25px #00ffff55;
   position: relative;
-  z-index: 5;
+  z-index: 3;
 }
-#logoutBtn {
-  background: linear-gradient(90deg, #ff0066, #ff6600);
-  box-shadow: 0 0 10px #ff3366;
-  border: none; color: #fff; font-weight: bold;
-  padding: 6px 14px; border-radius: 8px; cursor: pointer;
-}
-#logoutBtn:hover { box-shadow: 0 0 25px #ff6600; }
 
-/* ====== FORM ====== */
-h2 { text-align: center; text-shadow: 0 0 15px #00ffff; margin: 20px 0 10px; }
+/* ======== FORM ======== */
+h2 {
+  text-align: center;
+  text-shadow: 0 0 12px #00ffff;
+  margin: 18px 0 10px;
+  font-size: 1.1rem;
+}
 
 form {
-  background: rgba(0,15,25,.95);
-  border: 2px solid #00ffff44;
+  background: rgba(0,15,25,.9);
+  border: 1px solid #00ffff55;
   border-radius: 14px;
-  box-shadow: 0 0 30px #00ffff55;
-  padding: 18px;
-  margin: 0 auto;
+  box-shadow: 0 0 20px #00ffff44;
+  padding: 20px;
+  margin: 0 auto 20px;
   max-width: 480px;
+  width: 90%;
   position: relative;
   z-index: 2;
 }
-label { display: block; margin-top: 10px; font-weight: bold; }
+
+label {
+  display: block;
+  margin-top: 10px;
+  font-weight: bold;
+}
+
 input, select, textarea {
-  width: 100%; padding: 8px;
+  width: 100%;
+  padding: 8px;
   border-radius: 6px;
   border: 1px solid #00ffff44;
   background: #000814;
-  color: #0ff; font-size: 14px;
+  color: #0ff;
+  font-size: 14px;
 }
+
 button {
-  width: 100%; background: linear-gradient(90deg, #00ffff, #0077ff);
-  color: #000; font-weight: bold;
-  border: none; border-radius: 6px;
-  padding: 10px; margin-top: 10px;
-  cursor: pointer; box-shadow: 0 0 15px #00ffff88;
+  width: 100%;
+  background: linear-gradient(90deg, #00ffff, #0077ff);
+  color: #000;
+  font-weight: bold;
+  border: none;
+  border-radius: 6px;
+  padding: 10px;
+  margin-top: 10px;
+  cursor: pointer;
+  box-shadow: 0 0 15px #00ffff66;
+  transition: 0.2s ease;
 }
-button:hover { box-shadow: 0 0 30px #00ffff; }
 
-#msg { text-align: center; margin-top: 10px; font-weight: bold; color: #0ff; }
-#map, #mapData { height: 320px; margin-top: 10px; border-radius: 10px; }
+button:hover {
+  box-shadow: 0 0 25px #00ffff;
+}
 
-/* ====== EFEK KILAT ====== */
+#msg {
+  text-align: center;
+  margin-top: 10px;
+  font-weight: bold;
+  color: #0ff;
+}
+
+/* ======== PETA ======== */
+#map, #mapData {
+  height: 320px;
+  margin-top: 10px;
+  border-radius: 10px;
+  z-index: 2;
+}
+
+/* ======== KANVAS EFEK KILAT ======== */
 canvas#electricFX {
   position: fixed;
   top: 0; left: 0;
-  width: 100%; height: 100%;
+  width: 100vw; height: 100vh;
   pointer-events: none;
   z-index: 1;
-  opacity: .4;
+  opacity: .5;
+}
+
+/* ======== RESPONSIVE ======== */
+@media (max-width: 600px) {
+  form { padding: 15px; }
+  h2 { font-size: 1rem; }
+  input, select, textarea { font-size: 13px; }
 }
 </style>
 </head>
@@ -86,10 +123,7 @@ canvas#electricFX {
 <body>
 <canvas id="electricFX"></canvas>
 
-<header>
-  <div>⚡ <b>TINJU PJU Barito Timur</b></div>
-  <button id="logoutBtn">Keluar</button>
-</header>
+<header>⚡ <b>TINJU PJU Barito Timur</b></header>
 
 <h2>📋 Form Monitoring PJU</h2>
 
@@ -136,8 +170,8 @@ canvas#electricFX {
   <label>Keterangan:</label>
   <textarea id="keterangan" rows="3" placeholder="Tuliskan kondisi / catatan tambahan..."></textarea>
 
-  <label>📸 Upload Foto Lokasi:</label>
-  <input type="file" id="foto" accept="image/*">
+  <label>📸 Upload Foto Lokasi (bisa lebih dari satu):</label>
+  <input type="file" id="foto" accept="image/*" multiple>
 
   <button type="submit">✅ Kirim Data</button>
 </form>
@@ -152,9 +186,9 @@ canvas#electricFX {
 const PROXY = "https://broad-queen-be12.perluasanlistrik-bartim.workers.dev/?url=";
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwcMi_pBDlXeEzS5wxpIuiRmDjvkiwjgR53TmcfhGyi0DcKTSj3sgGXxfmPEpbVhUgg4g/exec";
 
-// --- Map Input ---
+// --- MAP INPUT ---
 const map = L.map('map').setView([-2.13,115.10], 9);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom:19}).addTo(map);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(map);
 let marker;
 map.on('click', e=>{
   const lat = e.latlng.lat.toFixed(6);
@@ -175,14 +209,17 @@ document.getElementById("lokasiSaya").addEventListener("click", ()=>{
   }, ()=>alert("Gagal mengambil lokasi."));
 });
 
-// --- Submit Data ---
+// --- SUBMIT DATA ---
 document.getElementById("tinjuForm").addEventListener("submit", async e=>{
   e.preventDefault();
-  const file = document.getElementById("foto").files[0];
-  let base64="";
-  if (file) base64 = await new Promise((res,rej)=>{
-    const r = new FileReader(); r.onload=()=>res(r.result); r.onerror=rej; r.readAsDataURL(file);
-  });
+
+  const files = Array.from(document.getElementById("foto").files);
+  const fotoBase64List = await Promise.all(files.map(file => new Promise((res,rej)=>{
+    const r = new FileReader();
+    r.onload=()=>res(r.result);
+    r.onerror=rej;
+    r.readAsDataURL(file);
+  })));
 
   const data = {
     action:"upload",
@@ -192,7 +229,7 @@ document.getElementById("tinjuForm").addEventListener("submit", async e=>{
     koordinat: document.getElementById("koordinat").value,
     jenis: document.getElementById("jenis").value,
     keterangan: document.getElementById("keterangan").value,
-    fotoBase64: base64
+    fotoBase64List
   };
 
   document.getElementById("msg").textContent="⚡ Mengirim data...";
@@ -202,7 +239,7 @@ document.getElementById("tinjuForm").addEventListener("submit", async e=>{
   else document.getElementById("msg").textContent="⚠️ "+r.message;
 });
 
-// --- Map Data Output ---
+// --- MAP OUTPUT ---
 const mapData = L.map("mapData").setView([-2.13,115.10],9);
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19}).addTo(mapData);
 
@@ -214,7 +251,13 @@ async function loadData(){
     data.forEach(d=>{
       if(!d.koordinat) return;
       const [lat,lng]=d.koordinat.split(",").map(Number);
-      const popup=`<b>${d.lokasi}</b><br>🧍 ${d.petugas}<br>📅 ${d.tanggal}<br>⚙️ ${d.jenis}<br>📝 ${d.keterangan}<br>${d.foto?`<a href="${d.foto}" target="_blank">📸 Lihat Foto</a>`:''}`;
+      let fotoHTML = "";
+      if (d.foto && Array.isArray(d.foto)) {
+        fotoHTML = d.foto.map((f,i)=>`<a href="${f}" target="_blank">📸 Foto ${i+1}</a>`).join("<br>");
+      } else if (d.foto) {
+        fotoHTML = `<a href="${d.foto}" target="_blank">📸 Lihat Foto</a>`;
+      }
+      const popup=`<b>${d.lokasi}</b><br>🧍 ${d.petugas}<br>📅 ${d.tanggal}<br>⚙️ ${d.jenis}<br>📝 ${d.keterangan}<br>${fotoHTML}`;
       const icon = L.divIcon({html:`<span style='color:#0ff;font-size:20px;text-shadow:0 0 10px #00ffff;'>⚡</span>`,className:""});
       L.marker([lat,lng],{icon}).addTo(mapData).bindPopup(popup);
     });
@@ -222,28 +265,32 @@ async function loadData(){
 }
 loadData();
 
-// ⚡ Efek kilat menggigit di latar belakang (kanvas ringan)
+// === Efek Kilat Menyeluruh (ringan) ===
 const c = document.getElementById("electricFX");
 const ctx = c.getContext("2d");
 function resize(){ c.width = innerWidth; c.height = innerHeight; }
 resize(); addEventListener("resize",resize);
+
 function lightning(){
   ctx.clearRect(0,0,c.width,c.height);
-  for(let i=0;i<3;i++){
-    const x = Math.random()*c.width;
+  for(let i=0;i<5;i++){
+    const startX = Math.random()*c.width;
+    const segments = Math.floor(Math.random()*10)+5;
     ctx.beginPath();
-    ctx.moveTo(x,0);
-    for(let y=0;y<c.height;y+=20){
-      ctx.lineTo(x+Math.random()*30-15,y+20);
+    ctx.moveTo(startX,0);
+    for(let j=0;j<segments;j++){
+      const x = startX + Math.random()*40 - 20;
+      const y = (j/segments)*c.height;
+      ctx.lineTo(x,y);
     }
-    ctx.strokeStyle=`rgba(0,255,255,${Math.random()*0.4+0.2})`;
-    ctx.lineWidth=1.5;
-    ctx.shadowBlur=20;
+    ctx.strokeStyle=`rgba(0,255,255,${Math.random()*0.4+0.1})`;
+    ctx.lineWidth=1.2;
+    ctx.shadowBlur=10;
     ctx.shadowColor="#0ff";
     ctx.stroke();
   }
 }
-setInterval(lightning,300);
+setInterval(lightning,250);
 </script>
 </body>
 </html>
