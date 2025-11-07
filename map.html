@@ -77,9 +77,8 @@ td a {
   color: #0ff;
   text-decoration: none;
 }
-tr:nth-child(even) {
-  background: rgba(0,255,255,0.05);
-}
+tr:nth-child(even) { background: rgba(0,255,255,0.05); }
+tr:hover { background: rgba(0,255,255,0.1); cursor: pointer; }
 
 /* ===== FOOTER ===== */
 footer {
@@ -145,6 +144,8 @@ const SCRIPT_URL="https://script.google.com/macros/s/AKfycbwcMi_pBDlXeEzS5wxpIui
 const mapData=L.map("mapData").setView([-2.13,115.10],9);
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19}).addTo(mapData);
 
+let markerMap = {}; // simpan marker untuk klik tabel
+
 async function loadData(){
   const res=await fetch(PROXY+SCRIPT_URL);
   const data=await res.json();
@@ -172,64 +173,53 @@ function filterData(data){
 
 function updateMap(data){
   mapData.eachLayer(l=>{if(l instanceof L.Marker)mapData.removeLayer(l);});
-  data.forEach(d=>{
+  markerMap = {};
+  data.forEach((d, i)=>{
     if(!d.koordinat) return;
-    const [lat,lng] = d.koordinat.split(",").map(Number);
-    
-    // kalau link GDrive view, ubah jadi direct image link
-    let fotoUrl = d.foto || "";
-    if (fotoUrl.includes("/view")) {
-      const id = fotoUrl.match(/\/d\/(.*?)\//);
-      if (id && id[1]) fotoUrl = `https://drive.google.com/uc?export=view&id=${id[1]}`;
-    }
-
-    const popup = `
+    const [lat,lng]=d.koordinat.split(",").map(Number);
+    const popup=`
       <b>${d.lokasi || '-'}</b><br>
       🧍 ${d.petugas || '-'}<br>
       📅 ${d.tanggal || '-'}<br>
       ⚙️ ${d.jenis || '-'}<br>
       📝 ${d.keterangan || '-'}<br>
-      ${fotoUrl ? `<a href="${fotoUrl}" target="_blank">📸 Lihat Foto</a>` : ''}
+      ${d.foto ? `<a href="${d.foto}" target="_blank">📎 Lihat Foto</a>` : ''}
     `;
-
-    const icon = L.divIcon({html:`<span style='color:#0ff;font-size:20px;text-shadow:0 0 10px #00ffff;'>⚡</span>`,className:""});
-    L.marker([lat,lng],{icon}).addTo(mapData).bindPopup(popup);
+    const icon=L.divIcon({html:`<span style='color:#0ff;font-size:20px;text-shadow:0 0 10px #00ffff;'>⚡</span>`,className:""});
+    const marker=L.marker([lat,lng],{icon}).addTo(mapData).bindPopup(popup);
+    markerMap[i] = marker;
   });
 }
 
 function updateTable(data){
-  const tbody = document.querySelector("#laporanTable tbody");
-  tbody.innerHTML = "";
-  data.forEach((d, i) => {
-    let fotoUrl = d.foto || "";
-    let fotoImg = "-";
-
-    // ubah link Google Drive jadi direct view
-    if (fotoUrl.includes("/view")) {
-      const id = fotoUrl.match(/\/d\/(.*?)\//);
-      if (id && id[1]) {
-        fotoUrl = `https://drive.google.com/uc?export=view&id=${id[1]}`;
-        fotoImg = `<a href="${fotoUrl}" target="_blank">
-                     <img src="${fotoUrl}" style="width:60px;height:60px;object-fit:cover;border-radius:6px;border:1px solid #00ffff55;box-shadow:0 0 6px #00ffff66;">
-                   </a>`;
-      }
+  const tbody=document.querySelector("#laporanTable tbody");
+  tbody.innerHTML="";
+  data.forEach((d,i)=>{
+    let fotoCell = "-";
+    if (d.foto) {
+      fotoCell = `<a href="${d.foto}" target="_blank">🔗 Link</a>`;
     }
 
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${i + 1}</td>
+    const tr=document.createElement("tr");
+    tr.innerHTML=`
+      <td>${i+1}</td>
       <td>${d.tanggal || '-'}</td>
       <td>${d.petugas || '-'}</td>
       <td>${d.lokasi || '-'}</td>
       <td>${d.jenis || '-'}</td>
       <td>${d.keterangan || '-'}</td>
-      <td>${fotoImg}</td>
+      <td>${fotoCell}</td>
     `;
+    tr.addEventListener("click",()=>{
+      const marker = markerMap[i];
+      if (marker) {
+        mapData.setView(marker.getLatLng(),16);
+        marker.openPopup();
+      }
+    });
     tbody.appendChild(tr);
   });
 }
-
-
 
 loadData();
 
@@ -253,6 +243,3 @@ setInterval(lightning,300);
 </script>
 </body>
 </html>
-
-
-
