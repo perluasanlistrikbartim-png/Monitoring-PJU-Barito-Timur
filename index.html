@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>⚡ TINJU PJU – Barito Timur</title>
+<title>⚡ Monitoring PJU – Barito Timur</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
 
 <style>
@@ -88,12 +88,51 @@ button:hover{box-shadow:0 0 25px #00ffff;}
 }
 #map,#mapData{height:320px;margin-top:10px;border-radius:10px;z-index:2;}
 canvas#electricFX{position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:1;opacity:.5;}
+  /* ====== HERO IMAGE DI ATAS HEADER ====== */
+.hero {
+  position: relative;
+  width: 100%;
+  height: 180px;
+  overflow: hidden;
+  background: radial-gradient(circle at center, #001122, #000);
+  box-shadow: 0 0 30px #00ffff55 inset;
+}
+
+.hero img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.8;
+  animation: zoomPulse 12s ease-in-out infinite;
+  filter: drop-shadow(0 0 20px #00ffffaa);
+}
+
+@keyframes zoomPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+}
+
+/* Tambahan efek cahaya tipis */
+.hero::after {
+  content: "";
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: radial-gradient(circle at center, transparent 40%, rgba(0,255,255,0.1));
+  animation: glowPulse 8s ease-in-out infinite;
+}
+
+@keyframes glowPulse {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.6; }
+}
+
 </style>
 </head>
 
 <body>
 <canvas id="electricFX"></canvas>
-<header>⚡ <b>TINJU PJU Barito Timur</b></header>
+<header>⚡ <b>Monitoring PJU Barito Timur</b></header>
 
 <h2 style="text-align:center;text-shadow:0 0 12px #00ffff;">📋 Form Monitoring PJU</h2>
 
@@ -279,3 +318,4 @@ setInterval(lightning,250);
 </script>
 </body>
 </html>
+
