@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🗺️ Peta & Tabel Laporan PJU – Barito Timur</title>
+<title>🗺️ Monitoring PJU – Barito Timur</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
 <style>
 body {
@@ -17,43 +17,20 @@ body {
 /* ===== HEADER ===== */
 header {
   text-align: center;
-  background: linear-gradient(180deg, #001122, #000);
-  padding: 20px 10px;
+  background: linear-gradient(90deg, #001122, #003344);
+  padding: 16px 10px;
   color: #0ff;
   font-weight: bold;
+  font-size: 1.2rem;
+  text-shadow: 0 0 10px #00ffff;
+  border-bottom: 1px solid #00ffff44;
   box-shadow: 0 0 25px #00ffff55 inset;
-}
-.header-logo {
-  width: 80px;
-  height: 80px;
-  margin: 0 auto 6px;
-  animation: zoomLogo 10s ease-in-out infinite;
-  filter: drop-shadow(0 0 20px #00ffffaa);
-}
-.header-logo img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  opacity: 0.9;
-}
-@keyframes zoomLogo {
-  0%,100%{transform:scale(1);}50%{transform:scale(1.08);}
-}
-.header-title {
-  font-size: 1.3rem;
-  text-shadow: 0 0 10px #00ffff, 0 0 25px #0088ff;
-}
-.header-sub {
-  font-size: 0.9rem;
-  color: #aaf;
-  text-shadow: 0 0 8px #00ffff77;
-  margin-top: 4px;
 }
 
 /* ===== FILTER ===== */
 .filter-box {
   text-align: center;
-  margin: 10px auto;
+  margin: 15px auto;
   color: #0ff;
 }
 select#filterPetugas {
@@ -66,7 +43,7 @@ select#filterPetugas {
   box-shadow: 0 0 10px #00ffff33 inset;
 }
 
-/* ===== PETA ===== */
+/* ===== MAP ===== */
 #mapData {
   height: 60vh;
   width: 100%;
@@ -75,15 +52,15 @@ select#filterPetugas {
   z-index: 2;
 }
 
-/* ===== TABEL ===== */
+/* ===== TABLE ===== */
 table {
   width: 95%;
-  margin: 15px auto 25px;
+  margin: 20px auto 30px;
   border-collapse: collapse;
-  background: rgba(0, 20, 40, 0.8);
+  background: rgba(0, 20, 40, 0.85);
   border-radius: 10px;
   overflow: hidden;
-  box-shadow: 0 0 20px #00ffff33;
+  box-shadow: 0 0 25px #00ffff33;
 }
 th, td {
   border: 1px solid #00ffff33;
@@ -112,3 +89,138 @@ footer {
   color:#0ff;
   font-weight:bold;
   text-shadow:0 0 10px #00ffffaa;
+  border-top:1px solid #00ffff44;
+  box-shadow:inset 0 0 25px #00ffff33;
+  font-size:0.9rem;
+}
+
+/* ===== LIGHTNING ===== */
+canvas#electricFX {
+  position: fixed; top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  pointer-events: none;
+  z-index: 1;
+  opacity: .5;
+}
+</style>
+</head>
+
+<body>
+<canvas id="electricFX"></canvas>
+
+<header>🗺️ Monitoring & Laporan PJU Barito Timur</header>
+
+<div class="filter-box">
+  <label>Filter Petugas:</label>
+  <select id="filterPetugas">
+    <option value="Semua">Semua Petugas</option>
+  </select>
+</div>
+
+<div id="mapData"></div>
+
+<h3 style="text-align:center;margin-top:25px;text-shadow:0 0 10px #00ffff;">📋 Tabel Rekap Laporan PJU</h3>
+<table id="laporanTable">
+  <thead>
+    <tr>
+      <th>No</th>
+      <th>Tanggal</th>
+      <th>Petugas</th>
+      <th>Lokasi</th>
+      <th>Jenis</th>
+      <th>Keterangan</th>
+      <th>Foto</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<footer>⚙️ Tim Swakelola PJU Barito Timur ⚡</footer>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+const PROXY="https://broad-queen-be12.perluasanlistrik-bartim.workers.dev/?url=";
+const SCRIPT_URL="https://script.google.com/macros/s/AKfycbwcMi_pBDlXeEzS5wxpIuiRmDjvkiwjgR53TmcfhGyi0DcKTSj3sgGXxfmPEpbVhUgg4g/exec";
+
+const mapData=L.map("mapData").setView([-2.13,115.10],9);
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19}).addTo(mapData);
+
+async function loadData(){
+  const res=await fetch(PROXY+SCRIPT_URL);
+  const data=await res.json();
+  renderData(data);
+}
+
+function renderData(data){
+  const petugasSet=new Set(data.map(d=>d.petugas).filter(Boolean));
+  const sel=document.getElementById("filterPetugas");
+  petugasSet.forEach(p=>{
+    const opt=document.createElement("option");
+    opt.value=p; opt.textContent=p;
+    sel.appendChild(opt);
+  });
+  sel.onchange=()=>filterData(data);
+  filterData(data);
+}
+
+function filterData(data){
+  const filter=document.getElementById("filterPetugas").value;
+  const filtered=filter==="Semua"?data:data.filter(d=>d.petugas===filter);
+  updateMap(filtered);
+  updateTable(filtered);
+}
+
+function updateMap(data){
+  mapData.eachLayer(l=>{if(l instanceof L.Marker)mapData.removeLayer(l);});
+  data.forEach(d=>{
+    if(!d.koordinat)return;
+    const [lat,lng]=d.koordinat.split(",").map(Number);
+    const fotos=(d.foto||"").split(" | ").filter(Boolean);
+    const links=fotos.map((f,i)=>`<a href="${f}" target="_blank">📸 Foto ${i+1}</a>`).join("<br>");
+    const popup=`<b>${d.lokasi}</b><br>🧍 ${d.petugas}<br>📅 ${d.tanggal}<br>⚙️ ${d.jenis}<br>📝 ${d.keterangan}<br>${links}`;
+    const icon=L.divIcon({html:`<span style='color:#0ff;font-size:20px;text-shadow:0 0 10px #00ffff;'>⚡</span>`,className:""});
+    L.marker([lat,lng],{icon}).addTo(mapData).bindPopup(popup);
+  });
+}
+
+function updateTable(data){
+  const tbody=document.querySelector("#laporanTable tbody");
+  tbody.innerHTML="";
+  data.forEach((d,i)=>{
+    const fotos=(d.foto||"").split(" | ").filter(Boolean);
+    const links=fotos.map((f,j)=>`<a href="${f}" target="_blank">📸 ${j+1}</a>`).join(" ");
+    const tr=document.createElement("tr");
+    tr.innerHTML=`
+      <td>${i+1}</td>
+      <td>${d.tanggal}</td>
+      <td>${d.petugas}</td>
+      <td>${d.lokasi}</td>
+      <td>${d.jenis}</td>
+      <td>${d.keterangan}</td>
+      <td>${links}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+loadData();
+
+// ⚡ Efek kilat
+const c=document.getElementById("electricFX"),ctx=c.getContext("2d");
+function resize(){c.width=innerWidth;c.height=innerHeight;}
+resize();addEventListener("resize",resize);
+function lightning(){
+  ctx.clearRect(0,0,c.width,c.height);
+  for(let i=0;i<3;i++){
+    const sx=Math.random()*c.width;
+    ctx.beginPath();ctx.moveTo(sx,0);
+    for(let y=0;y<c.height;y+=40){
+      ctx.lineTo(sx+Math.random()*40-20,y+40);
+    }
+    ctx.strokeStyle=`rgba(0,255,255,${Math.random()*0.3+0.1})`;
+    ctx.lineWidth=1.2;ctx.shadowBlur=12;ctx.shadowColor="#0ff";ctx.stroke();
+  }
+}
+setInterval(lightning,300);
+</script>
+</body>
+</html>
