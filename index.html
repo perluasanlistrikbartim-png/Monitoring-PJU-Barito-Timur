@@ -15,18 +15,73 @@ body {
   overflow-x: hidden;
   position: relative;
 }
+
+/* ===== HERO ===== */
+.hero {
+  position: relative;
+  width: 100%;
+  height: 210px;
+  overflow: hidden;
+  background: radial-gradient(circle at center, #001122, #000);
+  box-shadow: 0 0 40px #00ffff66 inset;
+}
+.hero img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.85;
+  animation: zoomPulse 12s ease-in-out infinite;
+  filter: drop-shadow(0 0 25px #00ffff88);
+}
+@keyframes zoomPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+}
+.hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, transparent 40%, rgba(0,255,255,0.12));
+  animation: glowPulse 8s ease-in-out infinite;
+}
+@keyframes glowPulse {
+  0%,100% {opacity:.3;} 50%{opacity:.6;}
+}
+.hero-text {
+  position: absolute;
+  bottom: 20px;
+  width: 100%;
+  text-align: center;
+  color: #0ff;
+  font-size: 1.6rem;
+  font-weight: bold;
+  text-shadow: 0 0 20px #00ffff, 0 0 40px #0088ff;
+  animation: fadeIn 3s ease forwards;
+}
+.hero-sub {
+  font-size: 1rem;
+  color: #aaf;
+  text-shadow: 0 0 15px #00ffff99;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== HEADER ===== */
 header {
   text-align: center;
-  padding: 16px 10px;
+  padding: 12px 10px;
   background: linear-gradient(90deg,#001122,#003344);
   color: #0ff;
   font-weight: bold;
-  font-size: 1.1rem;
+  font-size: 1rem;
   text-shadow: 0 0 8px #00ffffaa;
   box-shadow: 0 0 25px #00ffff55;
-  position: relative;
   z-index: 3;
 }
+
+/* ===== FORM ===== */
 form {
   background: rgba(0,15,25,.9);
   border: 1px solid #00ffff55;
@@ -36,18 +91,14 @@ form {
   margin: 0 auto 20px;
   max-width: 480px;
   width: 90%;
-  position: relative;
-  z-index: 2;
 }
 label {display:block;margin-top:10px;font-weight:bold;}
 input, select, textarea {
-  width: 100%;
-  padding: 8px;
+  width: 100%; padding: 8px;
   border-radius: 6px;
   border: 1px solid #00ffff44;
   background: #000814;
-  color: #0ff;
-  font-size: 14px;
+  color: #0ff; font-size: 14px;
 }
 button {
   width: 100%;
@@ -88,54 +139,34 @@ button:hover{box-shadow:0 0 25px #00ffff;}
 }
 #map,#mapData{height:320px;margin-top:10px;border-radius:10px;z-index:2;}
 canvas#electricFX{position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:1;opacity:.5;}
-  /* ====== HERO IMAGE DI ATAS HEADER ====== */
-.hero {
-  position: relative;
-  width: 100%;
-  height: 180px;
-  overflow: hidden;
-  background: radial-gradient(circle at center, #001122, #000);
-  box-shadow: 0 0 30px #00ffff55 inset;
+footer {
+  text-align:center;
+  padding:12px;
+  background:linear-gradient(90deg,#001122,#003344);
+  color:#0ff;
+  font-weight:bold;
+  text-shadow:0 0 10px #00ffffaa;
+  border-top:1px solid #00ffff44;
+  box-shadow:inset 0 0 25px #00ffff33;
 }
-
-.hero img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  opacity: 0.8;
-  animation: zoomPulse 12s ease-in-out infinite;
-  filter: drop-shadow(0 0 20px #00ffffaa);
-}
-
-@keyframes zoomPulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.08); }
-}
-
-/* Tambahan efek cahaya tipis */
-.hero::after {
-  content: "";
-  position: absolute;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background: radial-gradient(circle at center, transparent 40%, rgba(0,255,255,0.1));
-  animation: glowPulse 8s ease-in-out infinite;
-}
-
-@keyframes glowPulse {
-  0%, 100% { opacity: 0.3; }
-  50% { opacity: 0.6; }
-}
-
 </style>
 </head>
 
 <body>
 <canvas id="electricFX"></canvas>
-<header>⚡ <b>Monitoring PJU Barito Timur</b></header>
 
-<h2 style="text-align:center;text-shadow:0 0 12px #00ffff;">📋 Form Monitoring PJU</h2>
+<!-- HERO -->
+<div class="hero">
+  <img src="petir.png" alt="Petir - Monitoring PJU">
+  <div class="hero-text">
+    ⚡ Monitoring PJU Barito Timur ⚡
+    <div class="hero-sub">Energi dari Swakelola</div>
+  </div>
+</div>
 
+<header>📋 Form Laporan Kerusakan PJU</header>
+
+<!-- === FORM === -->
 <form id="tinjuForm">
   <label>Tanggal:</label>
   <input type="date" id="tanggal" required>
@@ -143,17 +174,12 @@ canvas#electricFX{position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-e
   <label>Petugas:</label>
   <select id="petugas" required>
     <optgroup label="Petugas Dinas">
-      <option value="Septeriady Ngubel">Septeriady Ngubel</option>
-      <option value="Kwartino Handriano">Kwartino Handriano</option>
-      <option value="Pawaino">Pawaino</option>
-      <option value="M. Rizki">M. Rizki</option>
-      <option value="Andri Karawaheno">Andri Karawaheno</option>
-      <option value="Denni Widyatsan">Denni Widyatsan</option>
+      <option>Septeriady Ngubel</option><option>Kwartino Handriano</option>
+      <option>Pawaino</option><option>M. Rizki</option>
+      <option>Andri Karawaheno</option><option>Denni Widyatsan</option>
     </optgroup>
     <optgroup label="Petugas Teknisi">
-      <option value="Ferry Andinata">Ferry Andinata</option>
-      <option value="Randelson Randin">Randelson Randin</option>
-      <option value="Muharman">Muharman</option>
+      <option>Ferry Andinata</option><option>Randelson Randin</option><option>Muharman</option>
     </optgroup>
   </select>
 
@@ -177,9 +203,7 @@ canvas#electricFX{position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-e
   <textarea id="keterangan" rows="3" placeholder="Tuliskan kondisi / catatan tambahan..."></textarea>
 
   <label>📸 Foto Lokasi:</label>
-  <div id="fotoArea">
-    <input type="file" class="fotoInput" accept="image/*">
-  </div>
+  <div id="fotoArea"><input type="file" class="fotoInput" accept="image/*"></div>
   <div class="preview-area" id="previewArea"></div>
   <button type="button" id="addFotoBtn">+ Tambah Foto Lagi</button>
 
@@ -191,47 +215,41 @@ canvas#electricFX{position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-e
 <h2 style="text-align:center;text-shadow:0 0 12px #00ffff;">🗺️ Peta Data PJU</h2>
 <div id="mapData"></div>
 
+<footer>⚙️ Tim Swakelola PJU Barito Timur ⚡</footer>
+
+<!-- === SCRIPT === -->
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script>
 const PROXY="https://broad-queen-be12.perluasanlistrik-bartim.workers.dev/?url=";
 const SCRIPT_URL="https://script.google.com/macros/s/AKfycbwcMi_pBDlXeEzS5wxpIuiRmDjvkiwjgR53TmcfhGyi0DcKTSj3sgGXxfmPEpbVhUgg4g/exec";
 let fotoFiles=[];
 
-// tambah foto input baru
 document.getElementById("addFotoBtn").addEventListener("click",()=>{
   const input=document.createElement("input");
-  input.type="file"; input.accept="image/*"; input.className="fotoInput";
+  input.type="file";input.accept="image/*";input.className="fotoInput";
   input.addEventListener("change",handleFotoSelect);
   document.getElementById("fotoArea").appendChild(input);
 });
-
-// handle setiap file yang dipilih
 function handleFotoSelect(e){
-  const file=e.target.files[0];
-  if(!file)return;
+  const file=e.target.files[0];if(!file)return;
   fotoFiles.push(file);
   const reader=new FileReader();
   reader.onload=()=>{
     const div=document.createElement("div");
     div.className="preview-item";
     div.innerHTML=`<img src="${reader.result}"><span>×</span>`;
-    div.querySelector("span").onclick=()=>{
-      div.remove();
-      fotoFiles=fotoFiles.filter(f=>f!==file);
-    };
+    div.querySelector("span").onclick=()=>{div.remove();fotoFiles=fotoFiles.filter(f=>f!==file);};
     document.getElementById("previewArea").appendChild(div);
   };
   reader.readAsDataURL(file);
 }
 document.querySelector(".fotoInput").addEventListener("change",handleFotoSelect);
 
-// === Map input ===
 const map=L.map('map').setView([-2.13,115.10],9);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(map);
 let marker;
 map.on('click',e=>{
-  const lat=e.latlng.lat.toFixed(6);
-  const lng=e.latlng.lng.toFixed(6);
+  const lat=e.latlng.lat.toFixed(6);const lng=e.latlng.lng.toFixed(6);
   document.getElementById('koordinat').value=`${lat},${lng}`;
   if(marker)map.removeLayer(marker);
   marker=L.marker(e.latlng).addTo(map).bindPopup(`📍 ${lat},${lng}`).openPopup();
@@ -239,8 +257,7 @@ map.on('click',e=>{
 document.getElementById("lokasiSaya").onclick=()=>{
   if(!navigator.geolocation)return alert("GPS tidak didukung browser ini.");
   navigator.geolocation.getCurrentPosition(pos=>{
-    const lat=pos.coords.latitude.toFixed(6);
-    const lng=pos.coords.longitude.toFixed(6);
+    const lat=pos.coords.latitude.toFixed(6);const lng=pos.coords.longitude.toFixed(6);
     document.getElementById('koordinat').value=`${lat},${lng}`;
     map.setView([lat,lng],17);
     if(marker)map.removeLayer(marker);
@@ -248,7 +265,6 @@ document.getElementById("lokasiSaya").onclick=()=>{
   },()=>alert("Gagal mengambil lokasi."));
 };
 
-// === Submit ===
 document.getElementById("tinjuForm").addEventListener("submit",async e=>{
   e.preventDefault();
   if(fotoFiles.length===0)return alert("Tambahkan minimal 1 foto.");
@@ -277,7 +293,6 @@ document.getElementById("tinjuForm").addEventListener("submit",async e=>{
   }else document.getElementById("msg").textContent="⚠️ "+r.message;
 });
 
-// === Map Output ===
 const mapData=L.map("mapData").setView([-2.13,115.10],9);
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19}).addTo(mapData);
 async function loadData(){
@@ -296,7 +311,7 @@ async function loadData(){
 }
 loadData();
 
-// === Efek Kilat ===
+// ⚡ Efek kilat
 const c=document.getElementById("electricFX");const ctx=c.getContext("2d");
 function resize(){c.width=innerWidth;c.height=innerHeight;}
 resize();addEventListener("resize",resize);
@@ -306,8 +321,7 @@ function lightning(){
     const sx=Math.random()*c.width;const seg=8;
     ctx.beginPath();ctx.moveTo(sx,0);
     for(let j=0;j<seg;j++){
-      const x=sx+Math.random()*40-20;
-      const y=(j/seg)*c.height;
+      const x=sx+Math.random()*40-20;const y=(j/seg)*c.height;
       ctx.lineTo(x,y);
     }
     ctx.strokeStyle=`rgba(0,255,255,${Math.random()*0.4+0.1})`;
@@ -318,4 +332,3 @@ setInterval(lightning,250);
 </script>
 </body>
 </html>
-
