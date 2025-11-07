@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>🗺️ Monitoring PJU – Barito Timur</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
+
 <style>
 body {
   font-family: 'Segoe UI', sans-serif;
@@ -77,8 +78,12 @@ td a {
   color: #0ff;
   text-decoration: none;
 }
-tr:nth-child(even) { background: rgba(0,255,255,0.05); }
-tr:hover { background: rgba(0,255,255,0.1); cursor: pointer; }
+tr:nth-child(even) {
+  background: rgba(0,255,255,0.05);
+}
+tr:hover {
+  background: rgba(0,255,255,0.1);
+}
 
 /* ===== FOOTER ===== */
 footer {
@@ -119,6 +124,7 @@ canvas#electricFX {
 <div id="mapData"></div>
 
 <h3 style="text-align:center;margin-top:25px;text-shadow:0 0 10px #00ffff;">📋 Tabel Rekap Laporan PJU</h3>
+
 <table id="laporanTable">
   <thead>
     <tr>
@@ -126,6 +132,7 @@ canvas#electricFX {
       <th>Tanggal</th>
       <th>Petugas</th>
       <th>Lokasi</th>
+      <th>Koordinat</th>
       <th>Jenis</th>
       <th>Keterangan</th>
       <th>Foto</th>
@@ -143,8 +150,39 @@ const SCRIPT_URL="https://script.google.com/macros/s/AKfycbwcMi_pBDlXeEzS5wxpIui
 
 const mapData=L.map("mapData").setView([-2.13,115.10],9);
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19}).addTo(mapData);
+let markerMap=[];
 
-let markerMap = {}; // simpan marker untuk klik tabel
+// ======== FUNGSI ========
+
+function setViewAndOpen(lat,lng,zoom=18){
+  let best=null,bestD=Infinity;
+  for(const m of markerMap){
+    const dx=m.lat-lat,dy=m.lng-lng;
+    const d2=dx*dx+dy*dy;
+    if(d2<bestD){bestD=d2;best=m;}
+  }
+  mapData.setView([lat,lng],zoom);
+  if(best && Math.sqrt(bestD)<0.002) best.marker.openPopup();
+}
+
+function focusFromURL(){
+  const q=new URLSearchParams(location.search);
+  const lat=parseFloat(q.get("lat"));
+  const lng=parseFloat(q.get("lng"));
+  const z=parseInt(q.get("z")||"18",10);
+  if(!isNaN(lat)&&!isNaN(lng)) setViewAndOpen(lat,lng,z);
+}
+
+document.addEventListener("click",e=>{
+  const a=e.target.closest("a.coord-link");
+  if(!a)return;
+  e.preventDefault();
+  const lat=parseFloat(a.dataset.lat);
+  const lng=parseFloat(a.dataset.lng);
+  const z=parseInt(a.dataset.zoom||"18",10);
+  setViewAndOpen(lat,lng,z);
+  history.replaceState(null,"",`?lat=${lat}&lng=${lng}&z=${z}`);
+});
 
 async function loadData(){
   const res=await fetch(PROXY+SCRIPT_URL);
@@ -157,7 +195,7 @@ function renderData(data){
   const sel=document.getElementById("filterPetugas");
   petugasSet.forEach(p=>{
     const opt=document.createElement("option");
-    opt.value=p; opt.textContent=p;
+    opt.value=p;opt.textContent=p;
     sel.appendChild(opt);
   });
   sel.onchange=()=>filterData(data);
@@ -165,145 +203,100 @@ function renderData(data){
 }
 
 function filterData(data){
-  const filter=document.getElementById("filterPetugas").value;
-  const filtered=filter==="Semua"?data:data.filter(d=>d.petugas===filter);
+  const f=document.getElementById("filterPetugas").value;
+  const filtered=f==="Semua"?data:data.filter(d=>d.petugas===f);
   updateMap(filtered);
   updateTable(filtered);
+  focusFromURL();
 }
 
 function updateMap(data){
   mapData.eachLayer(l=>{if(l instanceof L.Marker)mapData.removeLayer(l);});
-  markerMap = {};
+  markerMap=[];
 
-  data.forEach((d, i)=>{
-    if(!d.koordinat) return;
+  data.forEach((d,i)=>{
+    if(!d.koordinat||!d.koordinat.includes(","))return;
     const [lat,lng]=d.koordinat.split(",").map(Number);
 
-    // --- handle foto (bisa string atau array) ---
-    let fotoList = [];
-    if (Array.isArray(d.foto)) {
-      fotoList = d.foto.filter(Boolean);
-    } else if (typeof d.foto === "string" && d.foto.trim() !== "") {
-      fotoList = [d.foto.trim()];
-    }
+    let fotoList=[];
+    if(Array.isArray(d.foto))fotoList=d.foto.filter(Boolean);
+    else if(typeof d.foto==="string"&&d.foto.trim()!=="")fotoList=[d.foto.trim()];
 
-    // buat link-link foto
-    const fotoLinks = fotoList.map((f, idx) => {
-      let link = f;
-      if (f.includes("/view")) {
-        const id = f.match(/\/d\/(.*?)\//);
-        if (id && id[1]) link = `https://drive.google.com/uc?export=view&id=${id[1]}`;
+    const fotoLinks=fotoList.map((f,idx)=>{
+      let link=f;
+      if(f.includes("/view")){
+        const id=f.match(/\/d\/(.*?)\//);
+        if(id&&id[1])link=`https://drive.google.com/uc?export=view&id=${id[1]}`;
       }
       return `<a href="${link}" target="_blank">📸 Foto ${idx+1}</a>`;
     }).join("<br>");
 
-    // popup info
-    const popup = `
-      <b>${d.lokasi || '-'}</b><br>
-      🧍 ${d.petugas || '-'}<br>
-      📅 ${d.tanggal || '-'}<br>
-      ⚙️ ${d.jenis || '-'}<br>
-      📝 ${d.keterangan || '-'}<br>
-      ${fotoLinks || ''}
+    const popup=`
+      <b>${d.lokasi||"-"}</b><br>
+      🧍 ${d.petugas||"-"}<br>
+      📅 ${d.tanggal||"-"}<br>
+      ⚙️ ${d.jenis||"-"}<br>
+      📝 ${d.keterangan||"-"}<br>
+      ${fotoLinks}
     `;
 
-    const icon = L.divIcon({
-      html:`<span style='color:#0ff;font-size:20px;text-shadow:0 0 10px #00ffff;'>⚡</span>`,
-      className:""
-    });
-
+    const icon=L.divIcon({html:`<span style='color:#0ff;font-size:20px;text-shadow:0 0 10px #00ffff;'>⚡</span>`,className:""});
     const marker=L.marker([lat,lng],{icon}).addTo(mapData).bindPopup(popup);
-    markerMap[i] = marker;
-  });
-}
-
-
-function updateTable(data){
-  const tbody = document.querySelector("#laporanTable tbody");
-  tbody.innerHTML = "";
-
-  data.forEach((d, i) => {
-    // --- Normalisasi data foto (bisa string, array, null, atau undefined) ---
-    let fotoList = [];
-    if (Array.isArray(d.foto)) {
-      fotoList = d.foto.filter(f => f && f.trim() !== "");
-    } else if (typeof d.foto === "string" && d.foto.trim() !== "") {
-      fotoList = [d.foto.trim()];
-    }
-
-    // --- Buat cell foto ---
-    let fotoCell = "-";
-    if (fotoList.length > 0) {
-      fotoCell = fotoList.map((f, idx) => {
-        let link = f;
-        // ubah link GDrive /view → direct view
-        if (f.includes("/view")) {
-          const id = f.match(/\/d\/(.*?)\//);
-          if (id && id[1]) link = `https://drive.google.com/uc?export=view&id=${id[1]}`;
-        }
-        // tampilkan gambar kecil + link
-        return `
-          <a href="${link}" target="_blank" title="Lihat Foto ${idx+1}">
-            <img src="${link}" 
-                 alt="foto${idx+1}" 
-                 style="width:60px;height:60px;object-fit:cover;
-                        border-radius:6px;margin:2px;
-                        border:1px solid #00ffff55;
-                        box-shadow:0 0 6px #00ffff66;">
-          </a>
-        `;
-      }).join("");
-    }
-
-    // --- Buat baris tabel ---
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${i + 1}</td>
-      <td>${d.tanggal || '-'}</td>
-      <td>${d.petugas || '-'}</td>
-      <td>${d.lokasi || '-'}</td>
-      <td>${d.jenis || '-'}</td>
-      <td>${d.keterangan || '-'}</td>
-      <td>${fotoCell}</td>
-    `;
-
-    // --- Klik baris tabel → zoom ke marker di peta ---
-    tr.addEventListener("click", () => {
-      const marker = markerMap[i];
-      if (marker) {
-        mapData.setView(marker.getLatLng(), 16);
-        marker.openPopup();
-      }
-    });
-
-    tbody.appendChild(tr);
+    markerMap.push({lat,lng,marker});
   });
 }
 
 function updateTable(data){
   const tbody=document.querySelector("#laporanTable tbody");
   tbody.innerHTML="";
+
   data.forEach((d,i)=>{
-    let fotoCell = "-";
-    if (d.foto) {
-      fotoCell = `<a href="${d.foto}" target="_blank">🔗 Link</a>`;
+    let koordinatCell="-";
+    if(d.koordinat&&d.koordinat.includes(",")){
+      const [lat,lng]=d.koordinat.split(",").map(s=>s.trim());
+      koordinatCell=`
+        <a href="?lat=${lat}&lng=${lng}&z=18"
+           class="coord-link"
+           data-lat="${lat}" data-lng="${lng}" data-zoom="18"
+           style="color:#0ff;text-decoration:none;">
+           ${lat}, ${lng}
+        </a>`;
+    }
+
+    let fotoList=[];
+    if(Array.isArray(d.foto))fotoList=d.foto.filter(Boolean);
+    else if(typeof d.foto==="string"&&d.foto.trim()!=="")fotoList=[d.foto.trim()];
+    let fotoCell="-";
+    if(fotoList.length>0){
+      fotoCell=fotoList.map((f,idx)=>{
+        let link=f;
+        if(f.includes("/view")){
+          const id=f.match(/\/d\/(.*?)\//);
+          if(id&&id[1])link=`https://drive.google.com/uc?export=view&id=${id[1]}`;
+        }
+        return `<a href="${link}" target="_blank" title="Foto ${idx+1}">
+                  <img src="${link}" style="width:60px;height:60px;object-fit:cover;
+                    border-radius:6px;margin:2px;border:1px solid #00ffff55;
+                    box-shadow:0 0 6px #00ffff66;">
+                </a>`;
+      }).join("");
     }
 
     const tr=document.createElement("tr");
     tr.innerHTML=`
       <td>${i+1}</td>
-      <td>${d.tanggal || '-'}</td>
-      <td>${d.petugas || '-'}</td>
-      <td>${d.lokasi || '-'}</td>
-      <td>${d.jenis || '-'}</td>
-      <td>${d.keterangan || '-'}</td>
+      <td>${d.tanggal||"-"}</td>
+      <td>${d.petugas||"-"}</td>
+      <td>${d.lokasi||"-"}</td>
+      <td>${koordinatCell}</td>
+      <td>${d.jenis||"-"}</td>
+      <td>${d.keterangan||"-"}</td>
       <td>${fotoCell}</td>
     `;
     tr.addEventListener("click",()=>{
-      const marker = markerMap[i];
-      if (marker) {
-        mapData.setView(marker.getLatLng(),16);
-        marker.openPopup();
+      if(d.koordinat&&d.koordinat.includes(",")){
+        const [lat,lng]=d.koordinat.split(",").map(Number);
+        setViewAndOpen(lat,lng,18);
       }
     });
     tbody.appendChild(tr);
@@ -332,5 +325,3 @@ setInterval(lightning,300);
 </script>
 </body>
 </html>
-
-
