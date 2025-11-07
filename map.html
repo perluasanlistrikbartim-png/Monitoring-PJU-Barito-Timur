@@ -175,41 +175,52 @@ function updateMap(data){
   data.forEach(d=>{
     if(!d.koordinat) return;
     const [lat,lng] = d.koordinat.split(",").map(Number);
-    // pisah link pakai | atau , atau spasi
-    const fotos = (d.foto || "").split(/[,|]+/).map(s=>s.trim()).filter(Boolean);
-    const links = fotos.map((f,i)=>`<a href="${f}" target="_blank">📸 Foto ${i+1}</a>`).join("<br>");
+    
+    // kalau link GDrive view, ubah jadi direct image link
+    let fotoUrl = d.foto || "";
+    if (fotoUrl.includes("/view")) {
+      const id = fotoUrl.match(/\/d\/(.*?)\//);
+      if (id && id[1]) fotoUrl = `https://drive.google.com/uc?export=view&id=${id[1]}`;
+    }
+
     const popup = `
-      <b>${d.lokasi}</b><br>
-      🧍 ${d.petugas}<br>
-      📅 ${d.tanggal}<br>
-      ⚙️ ${d.jenis}<br>
-      📝 ${d.keterangan}<br>
-      ${links}
+      <b>${d.lokasi || '-'}</b><br>
+      🧍 ${d.petugas || '-'}<br>
+      📅 ${d.tanggal || '-'}<br>
+      ⚙️ ${d.jenis || '-'}<br>
+      📝 ${d.keterangan || '-'}<br>
+      ${fotoUrl ? `<a href="${fotoUrl}" target="_blank">📸 Lihat Foto</a>` : ''}
     `;
+
     const icon = L.divIcon({html:`<span style='color:#0ff;font-size:20px;text-shadow:0 0 10px #00ffff;'>⚡</span>`,className:""});
     L.marker([lat,lng],{icon}).addTo(mapData).bindPopup(popup);
   });
 }
 
 function updateTable(data){
-  const tbody = document.querySelector("#laporanTable tbody");
-  tbody.innerHTML = "";
+  const tbody=document.querySelector("#laporanTable tbody");
+  tbody.innerHTML="";
   data.forEach((d,i)=>{
-    const fotos = (d.foto || "").split(/[,|]+/).map(s=>s.trim()).filter(Boolean);
-    const links = fotos.map((f,j)=>`<a href="${f}" target="_blank">📸 ${j+1}</a>`).join(" ");
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
+    let fotoUrl = d.foto || "";
+    if (fotoUrl.includes("/view")) {
+      const id = fotoUrl.match(/\/d\/(.*?)\//);
+      if (id && id[1]) fotoUrl = `https://drive.google.com/uc?export=view&id=${id[1]}`;
+    }
+    const fotoLink = fotoUrl ? `<a href="${fotoUrl}" target="_blank">📸</a>` : '-';
+    const tr=document.createElement("tr");
+    tr.innerHTML=`
       <td>${i+1}</td>
-      <td>${d.tanggal}</td>
-      <td>${d.petugas}</td>
-      <td>${d.lokasi}</td>
-      <td>${d.jenis}</td>
-      <td>${d.keterangan}</td>
-      <td>${links}</td>
+      <td>${d.tanggal || '-'}</td>
+      <td>${d.petugas || '-'}</td>
+      <td>${d.lokasi || '-'}</td>
+      <td>${d.jenis || '-'}</td>
+      <td>${d.keterangan || '-'}</td>
+      <td>${fotoLink}</td>
     `;
     tbody.appendChild(tr);
   });
 }
+
 
 loadData();
 
@@ -233,4 +244,5 @@ setInterval(lightning,300);
 </script>
 </body>
 </html>
+
 
